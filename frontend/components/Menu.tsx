@@ -1,0 +1,137 @@
+"use client";
+
+import { CloudUploadIcon, CodeIcon } from "lucide-react";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { useMemo } from "react";
+import { type User } from "@/types";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useQuery } from "@tanstack/react-query";
+
+const PAGES = [
+  {
+    name: "Query",
+    path: "/",
+    icon: CodeIcon,
+  },
+  {
+    name: "Upload",
+    path: "/upload",
+    icon: CloudUploadIcon,
+  },
+];
+
+function MenuItem({
+  page,
+  active,
+  closeMenu,
+}: {
+  page: (typeof PAGES)[number];
+  active: boolean;
+  closeMenu?: () => void;
+}) {
+  return (
+    <Link href={"/finances" + page.path} onClick={closeMenu} prefetch={false}>
+      <div
+        className={cn(
+          buttonVariants({ variant: "secondary" }),
+          "gap-2 p-2 font-normal justify-start w-full rounded-sm text-nowrap hover:bg-slate-100 bg-transparent",
+          {
+            "text-primary": active,
+          },
+        )}
+        key={page.name}
+      >
+        <page.icon className="w-5 h-5" />
+        {page.name}
+      </div>
+    </Link>
+  );
+}
+
+const AVATAR_BG_COLOR = [
+  "bg-slate-200",
+  "bg-blue-200",
+  "bg-green-200",
+  "bg-yellow-200",
+  "bg-red-200",
+  "bg-pink-200",
+  "bg-purple-200",
+  "bg-indigo-200",
+  "bg-cyan-200",
+  "bg-teal-200",
+  "bg-lime-200",
+];
+
+const User = () => {
+  const { data } = useQuery({
+    queryKey: ["user"],
+    queryFn: async () => {
+      const res = await fetch("/api/auth/whoami");
+      if (!res.ok) {
+        throw new Error("Failed to fetch user");
+      }
+      const json = await res.json();
+      return json as User;
+    },
+  });
+
+  const bgColor = useMemo(() => {
+    const firstLetter = data?.username[0] || "A";
+    return AVATAR_BG_COLOR[firstLetter.charCodeAt(0) % AVATAR_BG_COLOR.length];
+  }, [data]);
+
+  return (
+    <div className="flex items-center">
+      <Avatar>
+        <AvatarFallback className={cn("capitalize font-bold", bgColor)}>
+          {data?.username[0]}
+        </AvatarFallback>
+      </Avatar>
+      <div className="flex flex-col justify-start items-start">
+        <span className="ml-2 text-sm text-slate-600 font-semibold">
+          @{data?.username}
+        </span>
+        <span className="ml-2 text-xs text-slate-400 font-normal">
+          {data?.email}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+const Menu = () => {
+  const path = usePathname();
+  const activePage = useMemo(() => {
+    if (path !== "/") {
+      for (const page of PAGES) {
+        if (path.startsWith("/finances" + page.path) && page.path !== "/") {
+          return page.name;
+        }
+      }
+    }
+    return "Query";
+  }, [path]);
+
+  return (
+    <div className="shrink-0 hidden md:flex w-auto h-full fixed md:static flex flex-col bg-slate-50 p-3 gap-2">
+      <User />
+      <div className="flex flex-col">
+        {PAGES.map((page) => {
+          return (
+            <MenuItem
+              page={page}
+              key={page.name}
+              active={activePage === page.name}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+export default Menu;
