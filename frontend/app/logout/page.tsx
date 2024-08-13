@@ -17,7 +17,7 @@ function LogoutPageInner() {
     })
       .then((res) => {
         if (res.ok) {
-          router.push(searchParams.get("redirect") || "/finances");
+          router.push(searchParams.get("redirect") || "/login");
         } else {
           console.log("Failed to logout", res);
         }

@@ -1,15 +1,20 @@
 "use client";
 
-import { CloudUploadIcon, CodeIcon } from "lucide-react";
-
+import { CloudUploadIcon, CodeIcon, LogOutIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useMemo } from "react";
 import { type User } from "@/types";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const PAGES = [
   {
@@ -85,21 +90,33 @@ const User = () => {
   }, [data]);
 
   return (
-    <div className="flex items-center">
-      <Avatar>
-        <AvatarFallback className={cn("capitalize font-bold", bgColor)}>
-          {data?.username[0]}
-        </AvatarFallback>
-      </Avatar>
-      <div className="flex flex-col justify-start items-start">
-        <span className="ml-2 text-sm text-slate-600 font-semibold">
-          @{data?.username}
-        </span>
-        <span className="ml-2 text-xs text-slate-400 font-normal">
-          {data?.email}
-        </span>
-      </div>
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger className="bg-transparent hover:bg-slate-100 border-none h-auto px-1 py-3 gap-1 items-center flex w-full">
+        <div className="flex items-center">
+          <Avatar>
+            <AvatarFallback className={cn("capitalize font-bold", bgColor)}>
+              {data?.username[0]}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col justify-start items-start">
+            <span className="ml-2 text-sm text-slate-600 font-semibold">
+              @{data?.username}
+            </span>
+            <span className="ml-2 text-xs text-slate-400 font-normal">
+              {data?.email}
+            </span>
+          </div>
+        </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56">
+        <DropdownMenuItem asChild>
+          <Link href="/logout" prefetch={false}>
+            <LogOutIcon className="w-5 h-5 mr-2" />
+            Logout
+          </Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 
