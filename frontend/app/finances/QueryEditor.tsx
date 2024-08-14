@@ -10,17 +10,23 @@ import "ace-builds/src-min-noconflict/keybinding-vim";
 import { Button } from "@/components/ui/button";
 import { useHotkeys } from "react-hotkeys-hook";
 import { CommandShortcut } from "@/components/ui/command";
+import { type DisplayType } from "./QueryResults";
+import DisplayTypeSelect from "./DisplayTypeSelect";
 
 function QueryEditor({
   query,
   setQuery,
   onSubmit,
   onFormat,
+  displayType,
+  setDisplayType,
 }: {
   query: string;
   setQuery: Dispatch<SetStateAction<string>>;
   onSubmit: () => void;
   onFormat: () => void;
+  displayType: DisplayType;
+  setDisplayType: Dispatch<SetStateAction<DisplayType>>;
 }) {
   const [isTablet, setIsTablet] = useState(false);
 
@@ -70,6 +76,7 @@ function QueryEditor({
             <CommandShortcut>⌘+;</CommandShortcut>
           </div>
         </Button>
+        <DisplayTypeSelect setValue={setDisplayType} value={displayType} />
       </div>
     </div>
   );

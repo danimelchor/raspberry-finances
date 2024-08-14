@@ -69,6 +69,12 @@ func Query(username string, query string) (*QueryResult, error) {
 	rows.Close()
 	db.Close()
 
+	// Save to history
+	err = SaveQueryToHistory(username, query)
+	if err != nil {
+		return nil, err
+	}
+
 	res := &QueryResult{
 		Rows:    results,
 		Columns: columns,

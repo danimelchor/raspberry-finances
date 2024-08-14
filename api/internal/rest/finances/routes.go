@@ -22,4 +22,7 @@ func ConfigureRoutes(r chi.Router) {
 	r.Post("/categorize", CategorizeMerchant)
 	r.Get("/categorized", GetCategories)
 	r.Delete("/categorize", UncategorizeMerchant)
+
+	// History
+	r.Get("/history", GetOrSearchHistory)
 }

@@ -3,14 +3,14 @@
 import { useState } from "react";
 
 import Spinner from "@/components/Spinner";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import QueryEditor from "./QueryEditor";
-import QueryTable from "./QueryTable";
-import Schema from "./Schema";
 import { useStorage } from "@/hooks/useStorage";
 import { format } from "sql-formatter";
+import QueryResults, { type DisplayType } from "./QueryResults";
+import RightPannel from "./RightPannel";
 
 type QueryResultPre = {
   columns: string[];
@@ -18,9 +18,12 @@ type QueryResultPre = {
 };
 
 function DynamicPage<T>() {
+  const queryClient = useQueryClient();
+
   const [error, setError] = useState<string>();
   const [data, setData] = useState<T[]>([]);
   const [columns, setColumns] = useState<string[]>();
+  const [displayType, setDisplayType] = useState<DisplayType>("table");
 
   const [query, setQuery] = useStorage<string>(
     "dynamic-query",
@@ -60,16 +63,7 @@ function DynamicPage<T>() {
     isSuccess,
   } = useMutation({
     mutationFn: handleSubmit,
-    onSettled: (data, error) => {
-      if (error) {
-        setError(error.message);
-        return;
-      } else if (!data) {
-        setError("No data returned");
-        return;
-      }
-
-      setError(undefined);
+    onSuccess: (data) => {
       setColumns(data.columns);
       setData(
         data.rows.map((row) => {
@@ -82,6 +76,11 @@ function DynamicPage<T>() {
           );
         }),
       );
+      setError(undefined);
+      queryClient.invalidateQueries({ queryKey: ["history"] });
+    },
+    onError: (error) => {
+      setError(error.message);
     },
   });
 
@@ -95,8 +94,11 @@ function DynamicPage<T>() {
             setQuery={setQuery}
             onFormat={handleFormat}
             onSubmit={() => handleSubmitMut(query)}
+            displayType={displayType}
+            setDisplayType={setDisplayType}
           />
           {running && <Spinner />}
+
           {error && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
@@ -106,15 +108,18 @@ function DynamicPage<T>() {
               </AlertDescription>
             </Alert>
           )}
+
           {data.length > 0 && columns && (
-            <div>
-              <QueryTable
+            <div className="flex items-center w-full">
+              <QueryResults
                 data={data}
                 columns={columns}
                 resubmit={() => handleSubmitMut(query)}
+                displayType={displayType}
               />
             </div>
           )}
+
           {data.length === 0 &&
             !running &&
             !error &&
@@ -128,7 +133,11 @@ function DynamicPage<T>() {
               </div>
             ))}
         </div>
-        <Schema setQuery={(q) => setQuery(formatSql(q))} />
+        <RightPannel
+          setQuery={(q) => setQuery(formatSql(q))}
+          setDisplayType={setDisplayType}
+          submitQuery={(q) => handleSubmitMut(q)}
+        />
       </div>
     </div>
   );

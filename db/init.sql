@@ -69,3 +69,20 @@ CREATE TRIGGER renames_update_updated_at
     BEFORE UPDATE ON renames
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at();
+
+-- Query history
+DROP TABLE IF EXISTS query_history CASCADE;
+CREATE TABLE IF NOT EXISTS query_history (
+    id SERIAL PRIMARY KEY,
+    query TEXT,
+    username TEXT REFERENCES users(username) ON DELETE CASCADE,
+    pinned BOOLEAN DEFAULT FALSE,
+    title TEXT DEFAULT '',
+    display_type TEXT DEFAULT 'table',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT query_history_unique UNIQUE (query, username)
+);
+CREATE TRIGGER query_history_update_updated_at
+    BEFORE UPDATE ON query_history
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at();
