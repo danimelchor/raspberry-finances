@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 import AceEditor from "react-ace";
 import "ace-builds/src-min-noconflict/mode-mysql";
@@ -8,28 +8,40 @@ import "ace-builds/src-min-noconflict/theme-github";
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-min-noconflict/keybinding-vim";
 import { Button } from "@/components/ui/button";
-import { useStorage } from "@/hooks/useStorage";
+import { format } from "sql-formatter";
+import { useHotkeys } from "react-hotkeys-hook";
+import { CommandShortcut } from "@/components/ui/command";
 
 function QueryEditor({
-  handleSubmit,
-  handleFormat,
+  query,
+  setQuery,
+  onSubmit,
 }: {
-  handleSubmit: (query: string) => void;
-  handleFormat: (query: string) => void;
+  query: string;
+  setQuery: Dispatch<SetStateAction<string>>;
+  onSubmit: () => void;
 }) {
-  const [query, setQuery] = useStorage<string>(
-    "dynamic-query",
-    "SELECT merchant, date, amount\nFROM statements\nLIMIT 1",
-  );
   const [isTablet, setIsTablet] = useState(false);
 
   useEffect(() => {
     setIsTablet(window.innerWidth < 1024);
   }, []);
 
+  const handleFormat = () => {
+    setQuery((q) => {
+      const formatted = format(q, {
+        language: "postgresql",
+      });
+      return formatted;
+    });
+  };
+
+  useHotkeys("mod+enter", onSubmit);
+  useHotkeys("mod+;", handleFormat);
+
   return (
     <div className="flex flex-col gap-2">
-      <div className="border rounded-md">
+      <div className="border rounded-md w-full h-full overflow-hidden">
         <AceEditor
           mode="mysql"
           theme="github"
@@ -49,14 +61,22 @@ function QueryEditor({
             fontFamily: "monospace",
           }}
           keyboardHandler={!isTablet ? "vim" : undefined}
-          minLines={10}
+          minLines={20}
           maxLines={20}
         />
       </div>
       <div className="flex gap-3">
-        <Button onClick={() => handleSubmit(query)}>Run</Button>
-        <Button onClick={() => handleFormat(query)} variant="secondary">
-          Format
+        <Button onClick={onSubmit}>
+          <div className="flex items-center gap-1">
+            Run
+            <CommandShortcut className="text-gray-100">⌘+↵</CommandShortcut>
+          </div>
+        </Button>
+        <Button onClick={handleFormat} variant="secondary">
+          <div className="flex items-center gap-1">
+            Format
+            <CommandShortcut>⌘+;</CommandShortcut>
+          </div>
         </Button>
       </div>
     </div>

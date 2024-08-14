@@ -1,6 +1,13 @@
 "use client";
 
-import { CloudUploadIcon, CodeIcon, LogOutIcon } from "lucide-react";
+import {
+  CloudUploadIcon,
+  CodeIcon,
+  EyeOffIcon,
+  LogOutIcon,
+  PieChartIcon,
+  StrikethroughIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
@@ -21,6 +28,21 @@ const PAGES = [
     name: "Query",
     path: "/",
     icon: CodeIcon,
+  },
+  {
+    name: "Categories",
+    path: "/categories",
+    icon: PieChartIcon,
+  },
+  {
+    name: "Hidden merchants",
+    path: "/hidden",
+    icon: EyeOffIcon,
+  },
+  {
+    name: "Renamed merchants",
+    path: "/renamed",
+    icon: StrikethroughIcon,
   },
   {
     name: "Upload",

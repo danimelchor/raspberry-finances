@@ -27,6 +27,23 @@ def start_go_backend():
         [
             "go",
             "run",
+            "cmd/cli/cli.go",
+            "create-user",
+            "--email",
+            "dmh672@gmail.com",
+            "--password",
+            "admin",
+            "--username",
+            "admin",
+        ],
+        cwd="api",
+        env=env(),
+    )
+
+    _ = subprocess.run(
+        [
+            "go",
+            "run",
             "cmd/service/main.go",
             "--host",
             "localhost",
