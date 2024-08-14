@@ -1,17 +1,12 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import DataTable from "@/components/ui/data-table";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowRightIcon } from "lucide-react";
+import { ColumnDef } from "@tanstack/react-table";
 import { toast } from "react-toastify";
 
-function RenamedMerchant({
-  originalName,
-  newName,
-}: {
-  originalName: string;
-  newName: string;
-}) {
+function RenamedMerchant({ originalName }: { originalName: string }) {
   const queryClient = useQueryClient();
 
   const unrename = async () => {
@@ -36,25 +31,45 @@ function RenamedMerchant({
   });
 
   return (
-    <div className="flex items-center justify-between gap-6 py-3">
-      <div className="flex items-center gap-2">
-        <div>{originalName}</div>
-        <ArrowRightIcon className="w-4 h-4" />
-        <div>{newName}</div>
-      </div>
-      <Button size="sm" onClick={() => mutateAsync()} variant="secondary">
-        Delete
-      </Button>
-    </div>
+    <Button size="sm" onClick={() => mutateAsync()} variant="secondary">
+      Delete
+    </Button>
   );
 }
 
-type RenamedMerchants = {
+type RenamedMerchantsResponse = {
   [originalName: string]: string;
 };
 
+type RenamedMerchant = {
+  originalName: string;
+  newName: string;
+};
+
+const columns: ColumnDef<RenamedMerchant>[] = [
+  {
+    header: "Original Name",
+    accessorKey: "originalName",
+    filterFn: "includesString",
+  },
+  {
+    header: "New Name",
+    accessorKey: "newName",
+    filterFn: "includesString",
+  },
+  {
+    id: "actions",
+    enableHiding: false,
+    enableColumnFilter: false,
+    cell: ({ row }) => (
+      <RenamedMerchant originalName={row.original.originalName} />
+    ),
+    size: -1,
+  },
+];
+
 function RenamedPage() {
-  const fetchRenamed = async (): Promise<RenamedMerchants> => {
+  const fetchRenamed = async (): Promise<RenamedMerchantsResponse> => {
     const res = await fetch("/api/renamed");
     return res.json();
   };
@@ -63,22 +78,20 @@ function RenamedPage() {
     queryKey: ["renamed"],
     queryFn: fetchRenamed,
   });
+  const rows: RenamedMerchant[] = data
+    ? Object.entries(data).map(([originalName, newName]) => ({
+        originalName,
+        newName,
+      }))
+    : [];
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl">Renamed</h1>
+    <div className="flex flex-col w-full p-10 gap-6">
+      <h1 className="text-4xl font-bold">Renamed</h1>
       {isLoading && <div>Loading...</div>}
 
       {!isLoading && data && Object.keys(data).length > 0 && (
-        <div className="flex flex-col divide-y divide-gray-200">
-          {Object.keys(data).map((merchant) => (
-            <RenamedMerchant
-              key={merchant}
-              originalName={merchant}
-              newName={data[merchant]}
-            />
-          ))}
-        </div>
+        <DataTable id="renamed" columns={columns} data={rows} />
       )}
     </div>
   );

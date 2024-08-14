@@ -30,8 +30,8 @@ const PAGES = [
     icon: CodeIcon,
   },
   {
-    name: "Categories",
-    path: "/categories",
+    name: "Categorized",
+    path: "/categorized",
     icon: PieChartIcon,
   },
   {

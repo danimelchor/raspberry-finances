@@ -1,7 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import DataTable from "@/components/ui/data-table";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { ColumnDef } from "@tanstack/react-table";
 import { toast } from "react-toastify";
 
 function HiddenMerchant({ merchant }: { merchant: string }) {
@@ -29,14 +31,30 @@ function HiddenMerchant({ merchant }: { merchant: string }) {
   });
 
   return (
-    <div className="flex items-center justify-between gap-6 py-3">
-      <div>{merchant}</div>
-      <Button size="sm" onClick={() => mutateAsync()} variant="secondary">
-        Unhide
-      </Button>
-    </div>
+    <Button size="sm" onClick={() => mutateAsync()} variant="secondary">
+      Unhide
+    </Button>
   );
 }
+
+type HiddenMerchant = {
+  merchant: string;
+};
+
+const columns: ColumnDef<HiddenMerchant>[] = [
+  {
+    header: "Merchant",
+    accessorKey: "merchant",
+    filterFn: "includesString",
+  },
+  {
+    id: "actions",
+    enableHiding: false,
+    enableColumnFilter: false,
+    cell: ({ row }) => <HiddenMerchant merchant={row.original.merchant} />,
+    size: -1,
+  },
+];
 
 function HiddenPage() {
   const fetchHidden = async (): Promise<string[]> => {
@@ -48,18 +66,17 @@ function HiddenPage() {
     queryKey: ["hidden"],
     queryFn: fetchHidden,
   });
+  const rows: HiddenMerchant[] = data
+    ? data.map((merchant) => ({ merchant }))
+    : [];
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl">Hidden</h1>
+    <div className="flex flex-col w-full p-10 gap-6">
+      <h1 className="text-4xl font-bold">Hidden</h1>
       {isLoading && <div>Loading...</div>}
 
       {!isLoading && data && data.length > 0 && (
-        <div className="flex flex-col divide-y divide-gray-200">
-          {data.map((merchant) => (
-            <HiddenMerchant key={merchant} merchant={merchant} />
-          ))}
-        </div>
+        <DataTable id="hidden" columns={columns} data={rows} />
       )}
     </div>
   );

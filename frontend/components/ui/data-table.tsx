@@ -107,6 +107,11 @@ function DataTable<TData, TValue>({
       inDateRange: inDateRange,
       option: option,
     },
+    defaultColumn: {
+      minSize: 0,
+      size: Number.MAX_SAFE_INTEGER,
+      maxSize: Number.MAX_SAFE_INTEGER,
+    },
   });
 
   return (
@@ -121,8 +126,14 @@ function DataTable<TData, TValue>({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
+                  const size = header.column.getSize();
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead
+                      key={header.id}
+                      style={{
+                        width: size == Number.MAX_SAFE_INTEGER ? "auto" : size,
+                      }}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(

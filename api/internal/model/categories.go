@@ -82,7 +82,7 @@ func UncategorizeMerchant(username string, merchant string) error {
 	// Backfill all statements
 	stmt, err = db.Prepare(`
 		UPDATE statements
-		SET category = NULL
+		SET category = ''
 		WHERE merchant = $1
 		AND username = $2
 	`)

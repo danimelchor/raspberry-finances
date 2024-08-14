@@ -376,6 +376,7 @@ function QueryTable<T>({
             </div>
           );
         },
+        size: -1,
       });
     }
 
