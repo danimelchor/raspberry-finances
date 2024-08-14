@@ -1,50 +1,32 @@
 package db
 
-import (
-	"fmt"
-)
-
 type QueryResult struct {
 	Rows    []interface{} `json:"rows"`
 	Columns []string      `json:"columns"`
 }
 
-func perUserContext() []string {
-	tables := map[string][]string{
-		"statements": {
-			"date",
-			"merchant",
-			"amount",
-			"category",
-			"source",
-		},
-	}
-
-	ctes := []string{}
-	for table, columns := range tables {
-		columnsStr := ""
-		for i, column := range columns {
-			if i != 0 {
-				columnsStr += ", "
-			}
-			columnsStr += column
-		}
-
-		ctes = append(ctes, fmt.Sprintf(`
-			CREATE TEMP TABLE %s AS (
-				SELECT %s
-				FROM %s
-				WHERE username = $1
-			);
-		`, table, columnsStr, table))
-	}
-	return ctes
+var CTES = []string{
+	`CREATE TEMP TABLE categories AS (
+		SELECT merchant, category
+		FROM categories
+		WHERE username = $1
+	);`,
+	`CREATE TEMP TABLE statements AS (
+		SELECT date, merchant, amount, source
+		FROM statements
+		WHERE username = $1
+	);`,
+	`CREATE TEMP TABLE all_data AS (
+		SELECT s.date, s.merchant, s.amount, c.category, s.source
+		FROM statements s
+		JOIN categories c ON s.merchant = c.merchant
+		WHERE $1 = $1
+	);`,
 }
 
 func Query(username string, query string) (*QueryResult, error) {
 	db := OpenDB()
-	queries := perUserContext()
-	for _, q := range queries {
+	for _, q := range CTES {
 		_, err := db.Exec(q, username)
 		if err != nil {
 			return nil, err

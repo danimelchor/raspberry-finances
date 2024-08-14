@@ -362,7 +362,7 @@ function QueryTable<T>({
         cell: ({ row }) => {
           const val = row.original as any;
           return (
-            <div className="flex gap-2">
+            <div className="flex">
               <HideMerchantButton merchant={val.merchant} resubmit={resubmit} />
               <RenameMerchantButton
                 merchant={val.merchant}

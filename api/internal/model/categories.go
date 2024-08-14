@@ -18,22 +18,6 @@ func CategorizeMerchant(username string, merchant string, category string) error
 		return err
 	}
 
-	// Backfill all statements
-	stmt, err = db.Prepare(`
-		UPDATE statements
-		SET category = $1
-		WHERE merchant = $2
-		AND username = $3
-	`)
-	if err != nil {
-		return err
-	}
-
-	_, err = stmt.Exec(category, merchant, username)
-	if err != nil {
-		return err
-	}
-
 	stmt.Close()
 	db.Close()
 	return nil
@@ -68,21 +52,6 @@ func UncategorizeMerchant(username string, merchant string) error {
 
 	stmt, err := db.Prepare(`
 		DELETE FROM categories
-		WHERE merchant = $1
-		AND username = $2
-	`)
-	if err != nil {
-		return err
-	}
-	_, err = stmt.Exec(merchant, username)
-	if err != nil {
-		return err
-	}
-
-	// Backfill all statements
-	stmt, err = db.Prepare(`
-		UPDATE statements
-		SET category = ''
 		WHERE merchant = $1
 		AND username = $2
 	`)

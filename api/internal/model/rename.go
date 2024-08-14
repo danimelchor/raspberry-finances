@@ -3,7 +3,7 @@ package db
 func RenameMerchant(username string, original_merchant string, new_merchant string) error {
 	db := OpenDB()
 
-	// Store new hidden merchant
+	// Store new renamed merchant
 	stmt, err := db.Prepare(`
 		INSERT INTO renames (original_merchant, new_merchant, username)
 		VALUES ($1, $2, $3)
@@ -84,7 +84,7 @@ func GetRenamedMerchants(username string) (map[string]string, error) {
 func DeleteMerchantRename(username string, original_merchant string) error {
 	db := OpenDB()
 
-	// Delete hidden merchant
+	// Delete renamed merchant
 	stmt, err := db.Prepare(`
 		DELETE FROM renames
 		WHERE original_merchant = $1
@@ -93,22 +93,8 @@ func DeleteMerchantRename(username string, original_merchant string) error {
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(original_merchant, username)
-	if err != nil {
-		return err
-	}
 
-	// Backfill all statements
-	stmt, err = db.Prepare(`
-		UPDATE statements
-		SET merchant = $1
-		WHERE merchant = $2
-		AND username = $3
-	`)
-	if err != nil {
-		return err
-	}
-	_, err = stmt.Exec(original_merchant, original_merchant, username)
+	_, err = stmt.Exec(original_merchant, username)
 	if err != nil {
 		return err
 	}

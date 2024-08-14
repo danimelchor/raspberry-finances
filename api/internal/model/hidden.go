@@ -17,20 +17,6 @@ func HideMerchant(username string, merchant string) error {
 		return err
 	}
 
-	// Backfill all statements
-	stmt, err = db.Prepare(`
-		DELETE FROM statements
-		WHERE merchant = $1
-		AND username = $2
-	`)
-	if err != nil {
-		return err
-	}
-	_, err = stmt.Exec(merchant, username)
-	if err != nil {
-		return err
-	}
-
 	stmt.Close()
 	db.Close()
 	return nil

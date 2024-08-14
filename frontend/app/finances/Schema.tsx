@@ -12,12 +12,22 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 
 const TABLES = {
-  statements: {
+  all_data: {
     date: "DATE",
     merchant: "TEXT",
     amount: "REAL",
     category: "TEXT",
     source: "TEXT",
+  },
+  statements: {
+    date: "DATE",
+    merchant: "TEXT",
+    amount: "REAL",
+    source: "TEXT",
+  },
+  categories: {
+    merchant: "TEXT",
+    category: "TEXT",
   },
 };
 
@@ -82,7 +92,7 @@ function TableSchema({ schema }: { schema: { [key: string]: string } }) {
 }
 
 function Schema() {
-  const [selected, setSelected] = useState<keyof typeof TABLES>("statements");
+  const [selected, setSelected] = useState<keyof typeof TABLES>("all_data");
   return (
     <Card className="h-full">
       <CardHeader>

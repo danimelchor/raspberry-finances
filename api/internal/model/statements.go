@@ -21,14 +21,25 @@ func (s *StatementRow) ToString() string {
 func InsertStatements(username string, statements []StatementRow) error {
 	db := OpenDB()
 
-	// Insert
-	stmt, err := db.Prepare(`
-		INSERT INTO statements (username, date, merchant, amount, category, source)
-		VALUES ($1, $2, $3, $4, $5, $6)
+	// Insert statement
+	statement_stmt, err := db.Prepare(`
+		INSERT INTO statements (username, date, merchant, amount, source)
+		VALUES ($1, $2, $3, $4, $5)
 		ON CONFLICT DO NOTHING;
 	`)
 	if err != nil {
-		log.Println("Error running insert statement", err)
+		log.Println("Error preparing insert statement", err)
+		return err
+	}
+
+	// Insert category
+	category_stmt, err := db.Prepare(`
+		INSERT INTO categories (username, merchant, category)
+		VALUES ($1, $2, $3)
+		ON CONFLICT (username, merchant) DO NOTHING;
+	`)
+	if err != nil {
+		log.Println("Error preparing insert category", err)
 		return err
 	}
 
@@ -38,20 +49,28 @@ func InsertStatements(username string, statements []StatementRow) error {
 			return err
 		}
 
-		_, err = stmt.Exec(
+		_, err = statement_stmt.Exec(
 			username,
 			statement.Date,
 			statement.Merchant,
 			statement.Amount,
-			statement.Category,
 			statement.Source,
+		)
+		if err != nil {
+			return err
+		}
+
+		_, err = category_stmt.Exec(
+			username,
+			statement.Merchant,
+			statement.Category,
 		)
 		if err != nil {
 			return err
 		}
 	}
 
-	stmt.Close()
+	statement_stmt.Close()
 	db.Close()
 	return nil
 }
