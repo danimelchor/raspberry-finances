@@ -1,19 +1,13 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import DataTable, { option } from "@/components/ui/data-table";
+import DataTable, { inDateRange, option } from "@/components/ui/data-table";
+import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowRightIcon } from "lucide-react";
 import { toast } from "react-toastify";
 
-function CategorizedMerchant({
-  merchant,
-  category,
-}: {
-  merchant: string;
-  category: string;
-}) {
+function CategorizedMerchant({ merchant }: { merchant: string }) {
   const queryClient = useQueryClient();
 
   const uncategorize = async () => {
@@ -44,42 +38,46 @@ function CategorizedMerchant({
   );
 }
 
-type CategorizedMerchantsResponse = {
-  [merchant: string]: string;
-};
-
 type CategorizedMerchants = {
   merchant: string;
   category: string;
+  updated_at: string;
 };
 
 const columns: ColumnDef<CategorizedMerchants>[] = [
   {
-    header: "Merchant",
     accessorKey: "merchant",
     filterFn: "includesString",
+    header: ({ column }) => {
+      return <DataTableColumnHeader column={column} title="Merchant" />;
+    },
   },
   {
-    header: "Category",
     accessorKey: "category",
     filterFn: option,
+    header: ({ column }) => {
+      return <DataTableColumnHeader column={column} title="Category" />;
+    },
+  },
+  {
+    accessorKey: "updated_at",
+    filterFn: inDateRange,
+    header: ({ column }) => {
+      return <DataTableColumnHeader column={column} title="Updated At" />;
+    },
+    cell: ({ row }) => new Date(row.original.updated_at).toLocaleString(),
   },
   {
     id: "actions",
     enableHiding: false,
     enableColumnFilter: false,
-    cell: ({ row }) => (
-      <CategorizedMerchant
-        merchant={row.original.merchant}
-        category={row.original.category}
-      />
-    ),
+    cell: ({ row }) => <CategorizedMerchant merchant={row.original.merchant} />,
     size: -1,
   },
 ];
 
 function CategorizedPage() {
-  const fetchCategorized = async (): Promise<CategorizedMerchantsResponse> => {
+  const fetchCategorized = async (): Promise<CategorizedMerchants[]> => {
     const res = await fetch("/api/categorized");
     return res.json();
   };
@@ -88,12 +86,6 @@ function CategorizedPage() {
     queryKey: ["categorized"],
     queryFn: fetchCategorized,
   });
-  const rows: CategorizedMerchants[] = data
-    ? Object.entries(data).map(([merchant, category]) => ({
-        merchant,
-        category,
-      }))
-    : [];
 
   return (
     <div className="flex flex-col w-full p-10 gap-6">
@@ -101,7 +93,12 @@ function CategorizedPage() {
       {isLoading && <div>Loading...</div>}
       {!isLoading && data && Object.keys(data).length > 0 && (
         <div className="flex flex-col divide-y divide-gray-200">
-          <DataTable id="categorized" data={rows} columns={columns} />
+          <DataTable
+            id="categorized"
+            data={data || []}
+            columns={columns}
+            defaultSort={[{ id: "updated_at", desc: true }]}
+          />
         </div>
       )}
     </div>

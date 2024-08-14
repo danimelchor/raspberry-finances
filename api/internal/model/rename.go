@@ -1,5 +1,7 @@
 package db
 
+import "time"
+
 func RenameMerchant(username string, original_merchant string, new_merchant string) error {
 	db := OpenDB()
 
@@ -7,7 +9,8 @@ func RenameMerchant(username string, original_merchant string, new_merchant stri
 	stmt, err := db.Prepare(`
 		INSERT INTO renames (original_merchant, new_merchant, username)
 		VALUES ($1, $2, $3)
-		ON CONFLICT DO NOTHING
+		ON CONFLICT DO UPDATE
+		SET new_merchant = $2
 	`)
 	if err != nil {
 		return err
@@ -55,26 +58,32 @@ func RenameMerchant(username string, original_merchant string, new_merchant stri
 	return nil
 }
 
-func GetRenamedMerchants(username string) (map[string]string, error) {
+type Rename struct {
+	OriginalMerchant string    `json:"original_merchant"`
+	NewMerchant      string    `json:"new_merchant"`
+	UpdatedAt        time.Time `json:"updated_at"`
+}
+
+func GetRenamedMerchants(username string) ([]Rename, error) {
 	db := OpenDB()
 	rows, err := db.Query(`
-		SELECT original_merchant, new_merchant
+		SELECT original_merchant, new_merchant, updated_at
 		FROM renames
 		WHERE username = $1
+		ORDER BY updated_at DESC
 	`, username)
 	if err != nil {
 		return nil, err
 	}
 
-	renames := map[string]string{}
+	renames := []Rename{}
+	var row Rename
 	for rows.Next() {
-		var original_merchant string
-		var new_merchant string
-		err = rows.Scan(&original_merchant, &new_merchant)
+		err = rows.Scan(&row.OriginalMerchant, &row.NewMerchant, &row.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
-		renames[original_merchant] = new_merchant
+		renames = append(renames, row)
 	}
 
 	db.Close()

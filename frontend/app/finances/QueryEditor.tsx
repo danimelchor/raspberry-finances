@@ -8,7 +8,6 @@ import "ace-builds/src-min-noconflict/theme-github";
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-min-noconflict/keybinding-vim";
 import { Button } from "@/components/ui/button";
-import { format } from "sql-formatter";
 import { useHotkeys } from "react-hotkeys-hook";
 import { CommandShortcut } from "@/components/ui/command";
 
@@ -16,10 +15,12 @@ function QueryEditor({
   query,
   setQuery,
   onSubmit,
+  onFormat,
 }: {
   query: string;
   setQuery: Dispatch<SetStateAction<string>>;
   onSubmit: () => void;
+  onFormat: () => void;
 }) {
   const [isTablet, setIsTablet] = useState(false);
 
@@ -27,17 +28,8 @@ function QueryEditor({
     setIsTablet(window.innerWidth < 1024);
   }, []);
 
-  const handleFormat = () => {
-    setQuery((q) => {
-      const formatted = format(q, {
-        language: "postgresql",
-      });
-      return formatted;
-    });
-  };
-
   useHotkeys("mod+enter", onSubmit);
-  useHotkeys("mod+;", handleFormat);
+  useHotkeys("mod+;", onFormat);
 
   return (
     <div className="flex flex-col gap-2">
@@ -61,7 +53,7 @@ function QueryEditor({
             fontFamily: "monospace",
           }}
           keyboardHandler={!isTablet ? "vim" : undefined}
-          minLines={20}
+          minLines={10}
           maxLines={20}
         />
       </div>
@@ -72,7 +64,7 @@ function QueryEditor({
             <CommandShortcut className="text-gray-100">⌘+↵</CommandShortcut>
           </div>
         </Button>
-        <Button onClick={handleFormat} variant="secondary">
+        <Button onClick={onFormat} variant="secondary">
           <div className="flex items-center gap-1">
             Format
             <CommandShortcut>⌘+;</CommandShortcut>

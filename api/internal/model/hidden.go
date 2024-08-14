@@ -1,5 +1,7 @@
 package db
 
+import "time"
+
 func HideMerchant(username string, merchant string) error {
 	db := OpenDB()
 
@@ -22,25 +24,31 @@ func HideMerchant(username string, merchant string) error {
 	return nil
 }
 
-func GetHiddenMerchants(username string) ([]string, error) {
+type Hidden struct {
+	Merchant  string    `json:"merchant"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+func GetHiddenMerchants(username string) ([]Hidden, error) {
 	db := OpenDB()
 	rows, err := db.Query(`
-		SELECT merchant
+		SELECT merchant, updated_at
 		FROM hidden
 		WHERE username = $1
+		ORDER BY updated_at DESC
 	`, username)
 	if err != nil {
 		return nil, err
 	}
 
-	results := []string{}
-	var merchant string
+	results := []Hidden{}
+	var row Hidden
 	for rows.Next() {
-		err = rows.Scan(&merchant)
+		err = rows.Scan(&row.Merchant, &row.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
-		results = append(results, merchant)
+		results = append(results, row)
 	}
 
 	rows.Close()

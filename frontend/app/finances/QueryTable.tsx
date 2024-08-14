@@ -46,7 +46,10 @@ function inferFilter(
     lowercaseCol.includes("source")
   ) {
     return "includesString";
-  } else if (lowercaseCol.includes("date")) {
+  } else if (
+    lowercaseCol.includes("date") ||
+    lowercaseCol.includes("updated_at")
+  ) {
     return inDateRange;
   }
 

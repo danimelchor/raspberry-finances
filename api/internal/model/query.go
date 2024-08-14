@@ -7,7 +7,7 @@ type QueryResult struct {
 
 var CTES = []string{
 	`CREATE TEMP TABLE categories AS (
-		SELECT merchant, category
+		SELECT merchant, category, updated_at
 		FROM categories
 		WHERE username = $1
 	);`,
@@ -16,11 +16,22 @@ var CTES = []string{
 		FROM statements
 		WHERE username = $1
 	);`,
+	`CREATE TEMP TABLE hidden AS (
+		SELECT merchant, updated_at
+		FROM hidden
+		WHERE username = $1
+	);`,
 	`CREATE TEMP TABLE all_data AS (
-		SELECT s.date, s.merchant, s.amount, c.category, s.source
+		SELECT
+	      s.date,
+	      s.merchant,
+	      s.amount,
+	      s.source,
+	      coalesce(c.category, 'Uncategorized') as category
 		FROM statements s
-		JOIN categories c ON s.merchant = c.merchant
+		LEFT JOIN categories c ON s.merchant = c.merchant
 		WHERE $1 = $1
+		AND s.merchant NOT IN (SELECT merchant FROM hidden)
 	);`,
 }
 

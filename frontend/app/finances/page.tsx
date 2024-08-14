@@ -10,6 +10,7 @@ import QueryEditor from "./QueryEditor";
 import QueryTable from "./QueryTable";
 import Schema from "./Schema";
 import { useStorage } from "@/hooks/useStorage";
+import { format } from "sql-formatter";
 
 type QueryResultPre = {
   columns: string[];
@@ -41,6 +42,16 @@ function DynamicPage<T>() {
     }
     const data = await res.json();
     return data as QueryResultPre;
+  };
+
+  const formatSql = (sql: string) => {
+    return format(sql, {
+      language: "postgresql",
+    });
+  };
+
+  const handleFormat = () => {
+    setQuery((q) => formatSql(q));
   };
 
   const {
@@ -82,6 +93,7 @@ function DynamicPage<T>() {
           <QueryEditor
             query={query}
             setQuery={setQuery}
+            onFormat={handleFormat}
             onSubmit={() => handleSubmitMut(query)}
           />
           {running && <Spinner />}
@@ -116,7 +128,7 @@ function DynamicPage<T>() {
               </div>
             ))}
         </div>
-        <Schema />
+        <Schema setQuery={(q) => setQuery(formatSql(q))} />
       </div>
     </div>
   );

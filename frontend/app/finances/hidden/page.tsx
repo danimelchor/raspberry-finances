@@ -1,7 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import DataTable from "@/components/ui/data-table";
+import DataTable, { inDateRange } from "@/components/ui/data-table";
+import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
 import { toast } from "react-toastify";
@@ -39,13 +40,24 @@ function HiddenMerchant({ merchant }: { merchant: string }) {
 
 type HiddenMerchant = {
   merchant: string;
+  updated_at: string;
 };
 
 const columns: ColumnDef<HiddenMerchant>[] = [
   {
-    header: "Merchant",
     accessorKey: "merchant",
     filterFn: "includesString",
+    header: ({ column }) => {
+      return <DataTableColumnHeader column={column} title="Merchant" />;
+    },
+  },
+  {
+    accessorKey: "updated_at",
+    filterFn: inDateRange,
+    header: ({ column }) => {
+      return <DataTableColumnHeader column={column} title="Updated At" />;
+    },
+    cell: ({ row }) => new Date(row.original.updated_at).toLocaleString(),
   },
   {
     id: "actions",
@@ -57,7 +69,7 @@ const columns: ColumnDef<HiddenMerchant>[] = [
 ];
 
 function HiddenPage() {
-  const fetchHidden = async (): Promise<string[]> => {
+  const fetchHidden = async (): Promise<HiddenMerchant[]> => {
     const res = await fetch("/api/hidden");
     return res.json();
   };
@@ -66,9 +78,6 @@ function HiddenPage() {
     queryKey: ["hidden"],
     queryFn: fetchHidden,
   });
-  const rows: HiddenMerchant[] = data
-    ? data.map((merchant) => ({ merchant }))
-    : [];
 
   return (
     <div className="flex flex-col w-full p-10 gap-6">
@@ -76,7 +85,12 @@ function HiddenPage() {
       {isLoading && <div>Loading...</div>}
 
       {!isLoading && data && data.length > 0 && (
-        <DataTable id="hidden" columns={columns} data={rows} />
+        <DataTable
+          id="hidden"
+          columns={columns}
+          data={data || []}
+          defaultSort={[{ id: "updated_at", desc: true }]}
+        />
       )}
     </div>
   );

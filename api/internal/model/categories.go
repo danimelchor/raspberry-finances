@@ -1,5 +1,7 @@
 package db
 
+import "time"
+
 func CategorizeMerchant(username string, merchant string, category string) error {
 	db := OpenDB()
 
@@ -23,25 +25,32 @@ func CategorizeMerchant(username string, merchant string, category string) error
 	return nil
 }
 
-func GetCategories(username string) (map[string]string, error) {
+type Category struct {
+	Merchant  string    `json:"merchant"`
+	Category  string    `json:"category"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+func GetCategories(username string) ([]Category, error) {
 	db := OpenDB()
 	rows, err := db.Query(`
-		SELECT merchant, category
+		SELECT merchant, category, updated_at
 		FROM categories
 		WHERE username = $1
+		ORDER BY updated_at DESC
 	`, username)
 	if err != nil {
 		return nil, err
 	}
 
-	categories := map[string]string{}
+	categories := []Category{}
+	var row Category
 	for rows.Next() {
-		var merchant, category string
-		err := rows.Scan(&merchant, &category)
+		err := rows.Scan(&row.Merchant, &row.Category, &row.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
-		categories[merchant] = category
+		categories = append(categories, row)
 	}
 
 	return categories, nil

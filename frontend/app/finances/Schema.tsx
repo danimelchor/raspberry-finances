@@ -10,14 +10,15 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 const TABLES = {
   all_data: {
     date: "DATE",
     merchant: "TEXT",
     amount: "REAL",
-    category: "TEXT",
     source: "TEXT",
+    category: "TEXT",
   },
   statements: {
     date: "DATE",
@@ -28,6 +29,11 @@ const TABLES = {
   categories: {
     merchant: "TEXT",
     category: "TEXT",
+    updated_at: "DATE",
+  },
+  hidden: {
+    merchant: "TEXT",
+    updated_at: "DATE",
   },
 };
 
@@ -91,8 +97,15 @@ function TableSchema({ schema }: { schema: { [key: string]: string } }) {
   );
 }
 
-function Schema() {
+function Schema({ setQuery }: { setQuery: (query: string) => void }) {
   const [selected, setSelected] = useState<keyof typeof TABLES>("all_data");
+
+  const prefill = () => {
+    const columns = Object.keys(TABLES[selected]);
+    const query = `SELECT ${columns.join(", ")} FROM ${selected} LIMIT 10;`;
+    setQuery(query);
+  };
+
   return (
     <Card className="h-full">
       <CardHeader>
@@ -103,6 +116,14 @@ function Schema() {
           <TableSelect selected={selected} setSelected={setSelected} />
           <TableSchema schema={TABLES[selected]} />
         </div>
+        <Button
+          onClick={prefill}
+          variant="secondary"
+          size="sm"
+          className="w-full mt-4"
+        >
+          Prefill query
+        </Button>
       </CardContent>
     </Card>
   );
