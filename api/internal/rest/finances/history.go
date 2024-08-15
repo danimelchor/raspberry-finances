@@ -30,3 +30,27 @@ func GetOrSearchHistory(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
+
+func UpdateHistory(w http.ResponseWriter, r *http.Request) {
+	username := r.Context().Value("username").(string)
+
+	var body db.History
+	err := json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = db.UpdateHistory(username, body)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	err = json.NewEncoder(w).Encode(body)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}

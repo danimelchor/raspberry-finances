@@ -25,4 +25,5 @@ func ConfigureRoutes(r chi.Router) {
 
 	// History
 	r.Get("/history", GetOrSearchHistory)
+	r.Put("/history", UpdateHistory)
 }

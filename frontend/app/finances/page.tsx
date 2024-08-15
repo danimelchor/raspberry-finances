@@ -11,6 +11,7 @@ import { useStorage } from "@/hooks/useStorage";
 import { format } from "sql-formatter";
 import QueryResults, { type DisplayType } from "./QueryResults";
 import RightPannel from "./RightPannel";
+import { useHotkeys } from "react-hotkeys-hook";
 
 type QueryResultPre = {
   columns: string[];
@@ -84,11 +85,15 @@ function DynamicPage<T>() {
     },
   });
 
+  useHotkeys("mod+;", handleFormat);
+  useHotkeys("mod+enter", () => handleSubmitMut(query));
+  useHotkeys("mod+backspace", () => setQuery(""));
+
   return (
-    <div className="flex flex-col h-screen w-full p-10 gap-6">
+    <div className="flex flex-col h-screen w-full p-10 border-box gap-6">
       <h1 className="text-4xl font-bold">Dynamic Queries</h1>
       <div className="flex gap-5 w-full h-full">
-        <div className="flex flex-col w-full gap-4">
+        <div className="flex flex-col gap-4 w-full h-full">
           <QueryEditor
             query={query}
             setQuery={setQuery}

@@ -107,7 +107,7 @@ function Schema({ setQuery }: { setQuery: (query: string) => void }) {
   };
 
   return (
-    <Card className="h-full">
+    <Card>
       <CardHeader>
         <CardTitle>Schema</CardTitle>
       </CardHeader>

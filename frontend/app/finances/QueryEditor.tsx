@@ -34,9 +34,6 @@ function QueryEditor({
     setIsTablet(window.innerWidth < 1024);
   }, []);
 
-  useHotkeys("mod+enter", onSubmit);
-  useHotkeys("mod+;", onFormat);
-
   return (
     <div className="flex flex-col gap-2">
       <div className="border rounded-md w-full h-full overflow-hidden">

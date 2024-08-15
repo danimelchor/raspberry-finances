@@ -7,18 +7,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { type DisplayType } from "./QueryResults";
-import { Dispatch, SetStateAction } from "react";
 
 export default function DisplayTypeSelect({
   value,
   setValue,
+  name,
+  fullSize,
 }: {
   value: DisplayType;
-  setValue: Dispatch<SetStateAction<DisplayType>>;
+  setValue: (value: DisplayType) => void;
+  name?: string;
+  fullSize?: boolean;
 }) {
   return (
-    <Select onValueChange={(val) => setValue(val as DisplayType)} value={value}>
-      <SelectTrigger className="w-[180px]">
+    <Select
+      onValueChange={(val) => setValue(val as DisplayType)}
+      value={value}
+      name={name}
+    >
+      <SelectTrigger className={fullSize ? "w-full" : "w-[180px]"}>
         <SelectValue placeholder="Select a display type" />
       </SelectTrigger>
       <SelectContent>

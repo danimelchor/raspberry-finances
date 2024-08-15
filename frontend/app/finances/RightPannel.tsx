@@ -1,7 +1,7 @@
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { DisplayType } from "./QueryResults";
 import Schema from "./Schema";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import QueryHistory from "./QueryHistory";
 
 function RightPannel({
@@ -13,22 +13,27 @@ function RightPannel({
   setQuery: (query: string) => void;
   setDisplayType: Dispatch<SetStateAction<DisplayType>>;
 }) {
+  const [tab, setTab] = useState("history");
+
   return (
-    <Tabs defaultValue="schema" className="w-[400px]">
+    <Tabs
+      value={tab}
+      onValueChange={setTab}
+      className="w-[350px] shrink-0 flex flex-col gap-2"
+    >
       <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="schema">Schema</TabsTrigger>
         <TabsTrigger value="history">History</TabsTrigger>
+        <TabsTrigger value="schema">Schema</TabsTrigger>
       </TabsList>
-      <TabsContent value="schema">
-        <Schema setQuery={setQuery} />
-      </TabsContent>
-      <TabsContent value="history">
+      {tab === "history" ? (
         <QueryHistory
           setQuery={setQuery}
           setDisplayType={setDisplayType}
           submitQuery={submitQuery}
         />
-      </TabsContent>
+      ) : (
+        <Schema setQuery={setQuery} />
+      )}
     </Tabs>
   );
 }
