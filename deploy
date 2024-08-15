@@ -27,7 +27,8 @@ if [[ "$*" == *--erase* ]]; then
     ssh $USERNAME@$HOST "cd ~/finances && docker volume rm finances_postgres_data"
 fi
 
-# Run docker stack
+# Pull and run docker
+ssh $USERNAME@$HOST "cd ~/finances && docker compose pull"
 ssh $USERNAME@$HOST "cd ~/finances && docker compose up -d"
 
 if [[ "$*" == *--erase* ]]; then

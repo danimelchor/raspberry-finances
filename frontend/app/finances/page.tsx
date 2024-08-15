@@ -49,6 +49,15 @@ function DynamicPage<T>() {
   }, []);
 
   const handleSubmit = async (query: Query) => {
+    if (query.id && query.sql !== query.originalSql) {
+      let confirm = window.confirm(
+        "You are about to update a saved query. Are you sure you want to do this?",
+      );
+      if (!confirm) {
+        return;
+      }
+    }
+
     const res = await fetch("/api/run", {
       method: "POST",
       body: JSON.stringify(query),

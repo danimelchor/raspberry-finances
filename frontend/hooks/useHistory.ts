@@ -7,7 +7,9 @@ const fetchHistory = async (id: number): Promise<Query> => {
   if (!res.ok) {
     throw new Error("Failed to search history");
   }
-  return res.json();
+  const query = (await res.json()) as Query;
+  query.originalSql = query.sql;
+  return query;
 };
 
 type UseHistoryProps = {
