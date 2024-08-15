@@ -3,54 +3,16 @@ package rest
 import (
 	"context"
 	db "dmelchorpi/internal/model"
+	"dmelchorpi/internal/security"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"time"
-
-	"crypto/rsa"
-	"crypto/x509"
-	"encoding/pem"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/golang-jwt/jwt/v5"
 )
-
-func LoadRsa() (*rsa.PrivateKey, error) {
-	privateKeyPath := "jwt.rsa"
-	privateKey, err := os.ReadFile(privateKeyPath)
-	if err != nil {
-		return nil, err
-	}
-	block, _ := pem.Decode(privateKey)
-	if block == nil {
-		return nil, err
-	}
-	privateKeyParsed, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-	if err != nil {
-		return nil, err
-	}
-	return privateKeyParsed, nil
-}
-
-func LoadRsaPub() (*rsa.PublicKey, error) {
-	publicKeyPath := "jwt.rsa.pub"
-	publicKey, err := os.ReadFile(publicKeyPath)
-	if err != nil {
-		return nil, err
-	}
-	block, _ := pem.Decode(publicKey)
-	if block == nil {
-		return nil, err
-	}
-	publicKeyParsed, err := x509.ParsePKCS1PublicKey(block.Bytes)
-	if err != nil {
-		return nil, err
-	}
-	return publicKeyParsed, nil
-}
 
 type AuthClaims struct {
 	Username string `json:"username"`
@@ -58,7 +20,7 @@ type AuthClaims struct {
 }
 
 func generateToken(user *db.User) (string, error) {
-	rsaPrivateKey, err := LoadRsa()
+	rsaPrivateKey, err := security.LoadRsa()
 	if err != nil {
 		return "", err
 	}
@@ -120,7 +82,7 @@ func getAuthenticatedUser(r *http.Request) (*db.User, error) {
 	}
 
 	token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
-		return LoadRsaPub()
+		return security.LoadRsaPub()
 	})
 	if err != nil {
 		return nil, err
@@ -146,6 +108,7 @@ func getAuthenticatedUser(r *http.Request) (*db.User, error) {
 func whoami(w http.ResponseWriter, r *http.Request) {
 	user, err := getAuthenticatedUser(r)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 	}
 

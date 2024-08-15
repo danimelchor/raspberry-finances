@@ -1,0 +1,33 @@
+#!/bin/bash
+
+
+if [[ "$*" == *--build* ]]; then
+    docker compose build 
+    docker push dmelchor/finances-api:latest
+    docker push dmelchor/finances-frontend:latest
+fi
+
+# ---- Deploy ----
+USERNAME=dmelchor
+HOST=dmelchorpi.local
+
+# Make directory
+ssh $USERNAME@$HOST "mkdir -p ~/finances"
+
+# Copy necessary files
+scp docker-compose.yaml $USERNAME@$HOST:~/finances
+scp .env $USERNAME@$HOST:~/finances
+scp -r db $USERNAME@$HOST:~/finances
+
+# Run docker stack
+ssh $USERNAME@$HOST "cd ~/finances && docker compose up -d"
+
+if [[ "$*" == *--register* ]]; then
+    read -p "Username: " USER
+    read -p "Password: " -s PASSWORD
+    echo
+    read -p "Email: " EMAIL
+    ssh $USERNAME@$HOST "docker exec api /cli create-user --username $USER --password $PASSWORD --email $EMAIL"
+fi
+
+echo "Deployed successfully!"

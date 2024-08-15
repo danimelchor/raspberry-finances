@@ -2,6 +2,7 @@ package main
 
 import (
 	"dmelchorpi/internal/rest"
+	"dmelchorpi/internal/security"
 	"flag"
 	"fmt"
 	"net/http"
@@ -39,6 +40,8 @@ func corsMiddleware(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	config := parseArgs()
+	security.MustGenerateRSAKeysIfNotExist()
+
 	r := chi.NewRouter()
 
 	// Add middlewares
