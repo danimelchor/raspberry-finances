@@ -8,7 +8,7 @@ export type DisplayType = "line" | "bar" | "pie" | "table";
 export type Query = {
   id?: number;
   sql: string;
-  originalSql: string;
+  originalSql?: string;
   updated_at?: string;
   pinned?: boolean;
   title?: string;

@@ -106,7 +106,6 @@ function Schema({ setQuery }: { setQuery: (query: Query) => void }) {
     const query = `SELECT ${columns.join(", ")} FROM ${selected} LIMIT 10;`;
     setQuery({
       sql: query,
-      originalSql: query,
       display_type: "table",
     });
   };

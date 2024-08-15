@@ -96,6 +96,10 @@ function DynamicPage<T>() {
   } = useMutation({
     mutationFn: (q: Query) => handleSubmit(q),
     onSuccess: (data) => {
+      if (!data) {
+        return;
+      }
+
       setColumns(data.columns);
       setData(
         data.rows.map((row) => {
