@@ -11,7 +11,7 @@ func GetOrSearchHistory(w http.ResponseWriter, r *http.Request) {
 	username := r.Context().Value("username").(string)
 	query := r.URL.Query().Get("q")
 
-	var history []db.History
+	var history []db.Query
 	var err error
 
 	if query == "" {
@@ -34,7 +34,7 @@ func GetOrSearchHistory(w http.ResponseWriter, r *http.Request) {
 func UpdateHistory(w http.ResponseWriter, r *http.Request) {
 	username := r.Context().Value("username").(string)
 
-	var body db.History
+	var body db.Query
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
 		log.Println(err)
@@ -49,6 +49,23 @@ func UpdateHistory(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = json.NewEncoder(w).Encode(body)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func GetHistoryById(w http.ResponseWriter, r *http.Request) {
+	username := r.Context().Value("username").(string)
+	id := r.URL.Query().Get("id")
+
+	history, err := db.GetHistoryById(username, id)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	err = json.NewEncoder(w).Encode(history)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -35,7 +35,7 @@ var CTES = []string{
 	);`,
 }
 
-func Query(username string, query string) (*QueryResult, error) {
+func RunQuery(username string, query Query) (*QueryResult, error) {
 	db := OpenDB()
 	for _, q := range CTES {
 		_, err := db.Exec(q, username)
@@ -43,7 +43,8 @@ func Query(username string, query string) (*QueryResult, error) {
 			return nil, err
 		}
 	}
-	rows, err := db.Query(query)
+
+	rows, err := db.Query(query.Sql)
 	if err != nil {
 		return nil, err
 	}

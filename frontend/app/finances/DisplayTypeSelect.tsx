@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { type DisplayType } from "./QueryResults";
+import type { DisplayType } from "@/types";
 
 export default function DisplayTypeSelect({
   value,

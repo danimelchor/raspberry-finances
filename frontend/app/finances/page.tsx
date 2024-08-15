@@ -1,21 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Spinner from "@/components/Spinner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import QueryEditor from "./QueryEditor";
-import { useStorage } from "@/hooks/useStorage";
 import { format } from "sql-formatter";
-import QueryResults, { type DisplayType } from "./QueryResults";
+import QueryResults from "./QueryResults";
 import RightPannel from "./RightPannel";
 import { useHotkeys } from "react-hotkeys-hook";
+import type { Query } from "@/types";
+import { useStorage } from "@/hooks/useStorage";
+import Header from "./Header";
 
 type QueryResultPre = {
   columns: string[];
   rows: any[][];
+};
+
+const DEFAULT_QUERY: Query = {
+  sql: "SELECT * FROM all_data LIMIT 10",
+  display_type: "table",
+};
+
+const EMPTY_QUERY: Query = {
+  sql: "",
+  display_type: "table",
 };
 
 function DynamicPage<T>() {
@@ -24,17 +36,22 @@ function DynamicPage<T>() {
   const [error, setError] = useState<string>();
   const [data, setData] = useState<T[]>([]);
   const [columns, setColumns] = useState<string[]>();
-  const [displayType, setDisplayType] = useState<DisplayType>("table");
 
-  const [query, setQuery] = useStorage<string>(
-    "dynamic-query",
-    "SELECT merchant, date, amount\nFROM statements\nLIMIT 1",
+  const [currentQuery, setCurrentQuery] = useStorage<Query>(
+    "query-editor",
+    DEFAULT_QUERY,
   );
 
-  const handleSubmit = async (query: string) => {
+  useEffect(() => {
+    setError(undefined);
+    setData([]);
+    setColumns(undefined);
+  }, []);
+
+  const handleSubmit = async (query: Query) => {
     const res = await fetch("/api/run", {
       method: "POST",
-      body: JSON.stringify({ query }),
+      body: JSON.stringify(query),
       headers: {
         "Content-Type": "application/json",
       },
@@ -55,7 +72,12 @@ function DynamicPage<T>() {
   };
 
   const handleFormat = () => {
-    setQuery((q) => formatSql(q));
+    setCurrentQuery((q) => {
+      if (q) {
+        return { ...q, sql: formatSql(q.sql) };
+      }
+      return q;
+    });
   };
 
   const {
@@ -63,7 +85,7 @@ function DynamicPage<T>() {
     isPending: running,
     isSuccess,
   } = useMutation({
-    mutationFn: handleSubmit,
+    mutationFn: (q: Query) => handleSubmit(q),
     onSuccess: (data) => {
       setColumns(data.columns);
       setData(
@@ -78,7 +100,7 @@ function DynamicPage<T>() {
         }),
       );
       setError(undefined);
-      queryClient.invalidateQueries({ queryKey: ["history"] });
+      queryClient.invalidateQueries({ queryKey: ["history-list"] });
     },
     onError: (error) => {
       setError(error.message);
@@ -86,22 +108,23 @@ function DynamicPage<T>() {
   });
 
   useHotkeys("mod+;", handleFormat);
-  useHotkeys("mod+enter", () => handleSubmitMut(query));
-  useHotkeys("mod+backspace", () => setQuery(""));
+  useHotkeys("mod+enter", () => handleSubmitMut(currentQuery));
+  useHotkeys("mod+backspace", () => setCurrentQuery(EMPTY_QUERY));
 
   return (
     <div className="flex flex-col h-screen w-full p-10 border-box gap-6">
       <h1 className="text-4xl font-bold">Dynamic Queries</h1>
       <div className="flex gap-5 w-full h-full">
         <div className="flex flex-col gap-4 w-full h-full">
+          <Header query={currentQuery} />
+
           <QueryEditor
-            query={query}
-            setQuery={setQuery}
+            query={currentQuery}
+            setQuery={setCurrentQuery}
             onFormat={handleFormat}
-            onSubmit={() => handleSubmitMut(query)}
-            displayType={displayType}
-            setDisplayType={setDisplayType}
+            onSubmit={() => handleSubmitMut(currentQuery)}
           />
+
           {running && <Spinner />}
 
           {error && (
@@ -119,8 +142,8 @@ function DynamicPage<T>() {
               <QueryResults
                 data={data}
                 columns={columns}
-                resubmit={() => handleSubmitMut(query)}
-                displayType={displayType}
+                resubmit={() => handleSubmitMut(currentQuery)}
+                displayType={currentQuery.display_type}
               />
             </div>
           )}
@@ -139,9 +162,11 @@ function DynamicPage<T>() {
             ))}
         </div>
         <RightPannel
-          setQuery={(q) => setQuery(formatSql(q))}
-          setDisplayType={setDisplayType}
-          submitQuery={(q) => handleSubmitMut(q)}
+          formatSql={formatSql}
+          setQuery={(q: Query) => {
+            setCurrentQuery(q);
+            handleSubmitMut(q);
+          }}
         />
       </div>
     </div>

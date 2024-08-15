@@ -79,8 +79,7 @@ CREATE TABLE IF NOT EXISTS query_history (
     pinned BOOLEAN DEFAULT FALSE,
     title TEXT DEFAULT '',
     display_type TEXT DEFAULT 'table',
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT query_history_unique UNIQUE (query, username)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TRIGGER query_history_update_updated_at
     BEFORE UPDATE ON query_history

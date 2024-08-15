@@ -24,6 +24,7 @@ func ConfigureRoutes(r chi.Router) {
 	r.Delete("/categorize", UncategorizeMerchant)
 
 	// History
-	r.Get("/history", GetOrSearchHistory)
+	r.Get("/history/list", GetOrSearchHistory)
+	r.Get("/history", GetHistoryById)
 	r.Put("/history", UpdateHistory)
 }

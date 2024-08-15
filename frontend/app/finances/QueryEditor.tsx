@@ -8,25 +8,22 @@ import "ace-builds/src-min-noconflict/theme-github";
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-min-noconflict/keybinding-vim";
 import { Button } from "@/components/ui/button";
-import { useHotkeys } from "react-hotkeys-hook";
 import { CommandShortcut } from "@/components/ui/command";
-import { type DisplayType } from "./QueryResults";
 import DisplayTypeSelect from "./DisplayTypeSelect";
+import type { Query } from "@/types";
+import { cn } from "@/lib/utils";
+import { PinIcon } from "lucide-react";
 
 function QueryEditor({
   query,
   setQuery,
   onSubmit,
   onFormat,
-  displayType,
-  setDisplayType,
 }: {
-  query: string;
-  setQuery: Dispatch<SetStateAction<string>>;
+  query: Query;
+  setQuery: Dispatch<SetStateAction<Query>>;
   onSubmit: () => void;
   onFormat: () => void;
-  displayType: DisplayType;
-  setDisplayType: Dispatch<SetStateAction<DisplayType>>;
 }) {
   const [isTablet, setIsTablet] = useState(false);
 
@@ -43,8 +40,8 @@ function QueryEditor({
           name="editor"
           width="100%"
           placeholder="Write your query here..."
-          value={query}
-          onChange={setQuery}
+          value={query.sql}
+          onChange={(query) => setQuery((q) => ({ ...q, sql: query }))}
           setOptions={{
             enableBasicAutocompletion: true,
             enableLiveAutocompletion: true,
@@ -73,7 +70,10 @@ function QueryEditor({
             <CommandShortcut>⌘+;</CommandShortcut>
           </div>
         </Button>
-        <DisplayTypeSelect setValue={setDisplayType} value={displayType} />
+        <DisplayTypeSelect
+          setValue={(v) => setQuery((q) => ({ ...q, display_type: v }))}
+          value={query.display_type}
+        />
       </div>
     </div>
   );

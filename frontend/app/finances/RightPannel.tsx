@@ -1,17 +1,15 @@
-import { Dispatch, SetStateAction, useState } from "react";
-import { DisplayType } from "./QueryResults";
+import { useState } from "react";
 import Schema from "./Schema";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import QueryHistory from "./QueryHistory";
+import { Query } from "@/types";
 
 function RightPannel({
-  submitQuery,
   setQuery,
-  setDisplayType,
+  formatSql,
 }: {
-  submitQuery: (query: string) => void;
-  setQuery: (query: string) => void;
-  setDisplayType: Dispatch<SetStateAction<DisplayType>>;
+  setQuery: (query: Query) => void;
+  formatSql: (sql: string) => string;
 }) {
   const [tab, setTab] = useState("history");
 
@@ -26,13 +24,9 @@ function RightPannel({
         <TabsTrigger value="schema">Schema</TabsTrigger>
       </TabsList>
       {tab === "history" ? (
-        <QueryHistory
-          setQuery={setQuery}
-          setDisplayType={setDisplayType}
-          submitQuery={submitQuery}
-        />
+        <QueryHistory setQuery={setQuery} />
       ) : (
-        <Schema setQuery={setQuery} />
+        <Schema setQuery={(q) => setQuery({ ...q, sql: formatSql(q.sql) })} />
       )}
     </Tabs>
   );

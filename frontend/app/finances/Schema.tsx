@@ -11,6 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Query } from "@/types";
 
 const TABLES = {
   all_data: {
@@ -97,13 +98,16 @@ function TableSchema({ schema }: { schema: { [key: string]: string } }) {
   );
 }
 
-function Schema({ setQuery }: { setQuery: (query: string) => void }) {
+function Schema({ setQuery }: { setQuery: (query: Query) => void }) {
   const [selected, setSelected] = useState<keyof typeof TABLES>("all_data");
 
   const prefill = () => {
     const columns = Object.keys(TABLES[selected]);
     const query = `SELECT ${columns.join(", ")} FROM ${selected} LIMIT 10;`;
-    setQuery(query);
+    setQuery({
+      sql: query,
+      display_type: "table",
+    });
   };
 
   return (

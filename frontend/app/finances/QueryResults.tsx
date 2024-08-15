@@ -2,8 +2,7 @@ import QueryTable from "./QueryTable";
 import CustomLineChart from "@/components/charts/CustomLineChart";
 import CustomBarChart from "@/components/charts/CustomBarChart";
 import CustomPieChart from "@/components/charts/CustomPieChart";
-
-export type DisplayType = "line" | "bar" | "pie" | "table";
+import { DisplayType } from "@/types";
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
