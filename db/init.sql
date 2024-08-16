@@ -72,6 +72,21 @@ CREATE TRIGGER renames_update_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at();
 
+-- Category renames
+DROP TABLE IF EXISTS category_renames CASCADE;
+CREATE TABLE IF NOT EXISTS category_renames (
+    id SERIAL PRIMARY KEY,
+    original_category TEXT,
+    new_category TEXT,
+    username TEXT REFERENCES users(username) ON DELETE CASCADE,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT category_rename_unique UNIQUE (original_category, username)
+);
+CREATE TRIGGER category_renames_update_updated_at
+    BEFORE UPDATE ON category_renames
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at();
+
 -- Query history
 DROP TABLE IF EXISTS query_history CASCADE;
 CREATE TABLE IF NOT EXISTS query_history (

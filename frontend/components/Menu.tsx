@@ -40,6 +40,11 @@ const PAGES = [
     icon: EyeOffIcon,
   },
   {
+    name: "Renamed categories",
+    path: "/renamed-categories",
+    icon: StrikethroughIcon,
+  },
+  {
     name: "Renamed merchants",
     path: "/renamed",
     icon: StrikethroughIcon,

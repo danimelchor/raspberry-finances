@@ -231,6 +231,93 @@ function RenameMerchantButton({
   );
 }
 
+function RenameCategoryButton({
+  category,
+  resubmit,
+}: {
+  category: string;
+  resubmit: () => void;
+}) {
+  const queryClient = useQueryClient();
+  const [open, setOpen] = React.useState(false);
+  const [new_category, setNewCategory] = React.useState<string>(category);
+
+  const onClick = () => {
+    return fetch("/api/rename/category", {
+      method: "POST",
+      body: JSON.stringify({ original_category: category, new_category }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  };
+
+  const { mutateAsync } = useMutation({
+    mutationFn: onClick,
+    onSuccess: () => {
+      toast.success("Category renamed");
+      queryClient.invalidateQueries({ queryKey: ["renamed-categories"] });
+      resubmit();
+      setOpen(false);
+    },
+    onError: () => {
+      toast.error("Failed to rename category");
+    },
+  });
+
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (new_category === category) {
+      toast.error("New category name must be different");
+      return;
+    }
+    mutateAsync();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger>
+        <Button
+          variant="ghost"
+          aria-label="Rename category"
+          className="p-2 h-auto"
+        >
+          <EditIcon className="w-4 h-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <form onSubmit={onSubmit}>
+            <DialogTitle>Rename Category</DialogTitle>
+            <div className="flex flex-col gap-4 pt-2">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="original_category">Original name</Label>
+                <Input
+                  type="text"
+                  name="original_category"
+                  value={category}
+                  className="border border-gray-300 rounded-md p-1"
+                  disabled
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="new_category">New name</Label>
+                <Input
+                  type="text"
+                  value={new_category}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  className="border border-gray-300 rounded-md p-1"
+                />
+              </div>
+              <Button type="submit">Rename</Button>
+            </div>
+          </form>
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function CategorizeMerchantButton({
   merchant,
   category,
@@ -374,6 +461,24 @@ function QueryTable<T>({
               />
               <CategorizeMerchantButton
                 merchant={val.merchant}
+                category={val.category}
+                resubmit={resubmit}
+              />
+            </div>
+          );
+        },
+        size: -1,
+      });
+    } else if (columns.includes("category")) {
+      tableColumns.push({
+        id: "rename-category",
+        enableHiding: false,
+        enableColumnFilter: false,
+        cell: ({ row }) => {
+          const val = row.original as any;
+          return (
+            <div className="flex">
+              <RenameCategoryButton
                 category={val.category}
                 resubmit={resubmit}
               />

@@ -8,13 +8,13 @@ import { ColumnDef } from "@tanstack/react-table";
 import { toast } from "react-toastify";
 import moment from "moment";
 
-function RenamedMerchant({ originalName }: { originalName: string }) {
+function RenamedCategory({ originalName }: { originalName: string }) {
   const queryClient = useQueryClient();
 
   const unrename = async () => {
-    await fetch("/api/rename", {
+    await fetch("/api/rename/category", {
       method: "DELETE",
-      body: JSON.stringify({ original_merchant: originalName }),
+      body: JSON.stringify({ original_category: originalName }),
       headers: {
         "Content-Type": "application/json",
       },
@@ -24,11 +24,11 @@ function RenamedMerchant({ originalName }: { originalName: string }) {
   const { mutateAsync } = useMutation({
     mutationFn: unrename,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["renamed"] });
-      toast.success("Merchant unrenamed");
+      queryClient.invalidateQueries({ queryKey: ["renamed-categories"] });
+      toast.success("Category unrenamed");
     },
     onError: () => {
-      toast.error("Failed to unrename merchant");
+      toast.error("Failed to unrename category");
     },
   });
 
@@ -39,25 +39,27 @@ function RenamedMerchant({ originalName }: { originalName: string }) {
   );
 }
 
-type RenamedMerchant = {
-  original_merchant: string;
-  new_merchant: string;
+type RenamedCategory = {
+  original_category: string;
+  new_category: string;
   updated_at: string;
 };
 
-const columns: ColumnDef<RenamedMerchant>[] = [
+const columns: ColumnDef<RenamedCategory>[] = [
   {
-    accessorKey: "original_merchant",
+    accessorKey: "original_category",
     filterFn: "includesString",
     header: ({ column }) => {
-      return <DataTableColumnHeader column={column} title="Original Name" />;
+      return (
+        <DataTableColumnHeader column={column} title="Original Category" />
+      );
     },
   },
   {
-    accessorKey: "new_merchant",
+    accessorKey: "new_category",
     filterFn: "includesString",
     header: ({ column }) => {
-      return <DataTableColumnHeader column={column} title="New Name" />;
+      return <DataTableColumnHeader column={column} title="New Category" />;
     },
   },
   {
@@ -74,31 +76,31 @@ const columns: ColumnDef<RenamedMerchant>[] = [
     enableHiding: false,
     enableColumnFilter: false,
     cell: ({ row }) => (
-      <RenamedMerchant originalName={row.original.original_merchant} />
+      <RenamedCategory originalName={row.original.original_category} />
     ),
     size: -1,
   },
 ];
 
 function RenamedPage() {
-  const fetchRenamed = async (): Promise<RenamedMerchant[]> => {
-    const res = await fetch("/api/renamed");
+  const fetchRenamed = async (): Promise<RenamedCategory[]> => {
+    const res = await fetch("/api/renamed/categories");
     return res.json();
   };
 
   const { data, isLoading } = useQuery({
-    queryKey: ["renamed"],
+    queryKey: ["renamed-categories"],
     queryFn: fetchRenamed,
   });
 
   return (
     <div className="flex flex-col w-full p-10 gap-6">
-      <h1 className="text-4xl font-bold">Renamed merchants</h1>
+      <h1 className="text-4xl font-bold">Renamed categories</h1>
       {isLoading && <div>Loading...</div>}
 
       {!isLoading && data && Object.keys(data).length > 0 && (
         <DataTable
-          id="renamed"
+          id="renamed-categories"
           columns={columns}
           data={data || []}
           defaultSort={[{ id: "updated_at", desc: true }]}

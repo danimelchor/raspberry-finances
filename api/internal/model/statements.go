@@ -18,13 +18,10 @@ func (s *StatementRow) ToString() string {
 	return fmt.Sprintf("%s %s %.2f %s %s", s.Date.Format("2006-01-02"), s.Merchant, s.Amount, s.Category, s.Source)
 }
 
-func InsertStatements(username string, statements []StatementRow) error {
-	db := OpenDB()
-
-	// Rename merchants
+func RenameMerchants(username string, statements []StatementRow) ([]StatementRow, error) {
 	renames, err := GetRenamedMerchants(username)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	for _, rename := range renames {
@@ -33,6 +30,41 @@ func InsertStatements(username string, statements []StatementRow) error {
 				statements[i].Merchant = rename.NewMerchant
 			}
 		}
+	}
+
+	return statements, nil
+}
+
+func RenameCategories(username string, statements []StatementRow) ([]StatementRow, error) {
+	category_renames, err := GetRenamedCategories(username)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, rename := range category_renames {
+		for i, statement := range statements {
+			if statement.Category == rename.OriginalCategory {
+				statements[i].Category = rename.NewCategory
+			}
+		}
+	}
+
+	return statements, nil
+}
+
+func InsertStatements(username string, statements []StatementRow) error {
+	db := OpenDB()
+
+	// Renames merchants
+	statements, err := RenameMerchants(username, statements)
+	if err != nil {
+		return err
+	}
+
+	// Renames categories
+	statements, err = RenameCategories(username, statements)
+	if err != nil {
+		return err
 	}
 
 	// Insert statement
