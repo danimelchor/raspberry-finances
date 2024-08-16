@@ -20,7 +20,7 @@ function QueryResults<T>({
   const xKey = columns[0];
   const yKey = columns[1];
 
-  if (displayType === "line") {
+  if (xKey && yKey && displayType === "line") {
     return (
       <CustomLineChart
         data={data}
@@ -30,7 +30,7 @@ function QueryResults<T>({
       />
     );
   }
-  if (displayType === "bar") {
+  if (xKey && yKey && displayType === "bar") {
     return (
       <CustomBarChart
         data={data}
@@ -40,7 +40,7 @@ function QueryResults<T>({
       />
     );
   }
-  if (displayType === "pie") {
+  if (xKey && yKey && displayType === "pie") {
     return <CustomPieChart data={data} xKey={xKey} yKey={yKey} />;
   }
   return <QueryTable data={data} columns={columns} resubmit={resubmit} />;
