@@ -103,7 +103,7 @@ function Schema({ setQuery }: { setQuery: (query: Query) => void }) {
 
   const prefill = () => {
     const columns = Object.keys(TABLES[selected]);
-    const query = `SELECT ${columns.join(", ")} FROM ${selected} LIMIT 10;`;
+    const query = `SELECT ${columns.join(", ")} FROM ${selected} ORDER BY ${columns[0]} DESC LIMIT 10`;
     setQuery({
       sql: query,
       display_type: "table",

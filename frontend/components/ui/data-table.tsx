@@ -27,6 +27,7 @@ import { DataTableColumnVisibility } from "./data-table-column-toggle";
 import { useStorage } from "@/hooks/useStorage";
 import DataTableFilters from "./data-table-filters";
 import { DateRange } from "react-day-picker";
+import moment from "moment";
 
 interface DataTableProps<TData, TValue> {
   id: string;
@@ -41,15 +42,15 @@ export const inDateRange: FilterFn<any> = (
   filterValue: DateRange,
 ) => {
   const val = row.getValue<string>(columnId);
-  const date = new Date(val as string);
+  const date = moment.utc(val as string);
   const from = filterValue?.from;
   const to = filterValue?.to;
   let result = true;
   if (from) {
-    result = result && date >= from;
+    result = result && date.toDate() >= from;
   }
   if (to) {
-    result = result && date <= to;
+    result = result && date.toDate() <= to;
   }
   return result;
 };

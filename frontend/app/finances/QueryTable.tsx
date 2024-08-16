@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import moment from "moment";
 
 export const dollarFormat = (n: number): string => {
   return Intl.NumberFormat("en-US", {
@@ -59,8 +60,8 @@ function inferFilter(
 
   if (typeof sampleValue === "string") {
     try {
-      const date = new Date(sampleValue);
-      if (!isNaN(date.getTime())) {
+      const date = moment.utc(sampleValue);
+      if (date.isValid()) {
         return inDateRange;
       }
     } catch (e) {}
@@ -91,7 +92,7 @@ function inferCell<TData, TValue>(
   if (lowercaseCol.includes("date")) {
     return ({ row }) => {
       let original = row.original as any;
-      return new Date(original[col] as string).toLocaleString();
+      return moment.utc(original[col] as string).toISOString();
     };
   }
 

@@ -6,6 +6,7 @@ import { DataTableColumnHeader } from "@/components/ui/data-table-column-header"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
 import { toast } from "react-toastify";
+import moment from "moment";
 
 function RenamedMerchant({ originalName }: { originalName: string }) {
   const queryClient = useQueryClient();
@@ -66,7 +67,7 @@ const columns: ColumnDef<RenamedMerchant>[] = [
     header: ({ column }) => {
       return <DataTableColumnHeader column={column} title="Updated At" />;
     },
-    cell: ({ row }) => new Date(row.original.updated_at).toLocaleString(),
+    cell: ({ row }) => moment.utc(row.original.updated_at).toISOString(),
   },
   {
     id: "actions",

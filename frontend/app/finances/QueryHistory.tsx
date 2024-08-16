@@ -14,6 +14,8 @@ import type { Query } from "@/types";
 import useHistoryList from "@/hooks/useHistoryList";
 import EditQueryDialog from "./EditQueryDialog";
 import TogglePinnedButton from "./TogglePinnedButton";
+import moment from "moment";
+import humanizeDuration from "humanize-duration";
 
 function CollapsibleSql({ sql }: { sql: string }) {
   const [open, setOpen] = useState(false);
@@ -43,6 +45,22 @@ function QueryItem({
   setQuery: (query: Query) => void;
   item: Query;
 }) {
+  const getLatestRunStr = () => {
+    const lastRun = moment.utc(item.updated_at!).diff(moment.utc());
+    return humanizeDuration(lastRun, {
+      largest: 2,
+      round: true,
+    });
+  };
+
+  const [lastRunStr, setLastRunStr] = useState(getLatestRunStr);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLastRunStr(getLatestRunStr());
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="py-5 cursor-pointer flex flex-col gap-1">
       <div className="flex justify-between items-center gap-1">
@@ -72,9 +90,7 @@ function QueryItem({
       </div>
 
       <CollapsibleSql sql={item.sql} />
-      <div className="text-sm text-gray-500">
-        Last run: {new Date(item.updated_at!).toLocaleString()}
-      </div>
+      <div className="text-sm text-gray-500">Last run: {lastRunStr} ago</div>
       <div className="text-sm text-gray-500">
         Display type: {item.display_type}
       </div>
