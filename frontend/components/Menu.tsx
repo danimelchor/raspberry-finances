@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ChartColumnStackedIcon,
   CloudUploadIcon,
   CodeIcon,
   EyeOffIcon,
@@ -42,7 +43,7 @@ const PAGES = [
   {
     name: "Renamed categories",
     path: "/renamed-categories",
-    icon: StrikethroughIcon,
+    icon: ChartColumnStackedIcon,
   },
   {
     name: "Renamed merchants",
