@@ -2,6 +2,7 @@ package parsing
 
 import (
 	db "dmelchorpi/internal/model"
+	"math"
 )
 
 type AmexStatementRow struct {
@@ -39,16 +40,24 @@ func (am AppleStatementRow) ToStatementRow() db.StatementRow {
 }
 
 type CapitalOneStatementRow struct {
-	Date     MMsDDsYY `csv:"Transaction Date"`
-	Merchant string   `csv:"Transaction Description"`
-	Amount   float32  `csv:"Transaction Amount"`
+	Date            MMsDDsYY `csv:"Transaction Date"`
+	Merchant        string   `csv:"Transaction Description"`
+	Amount          float64  `csv:"Transaction Amount"`
+	TransactionType string   `csv:"Transaction Type"`
 }
 
 func (am CapitalOneStatementRow) ToStatementRow() db.StatementRow {
+	var amount float64
+	if am.TransactionType == "DEBIT" {
+		amount = math.Abs(am.Amount) * -1
+	} else {
+		amount = math.Abs(am.Amount)
+	}
+
 	return db.StatementRow{
 		Date:     am.Date.Time,
 		Merchant: am.Merchant,
-		Amount:   am.Amount,
+		Amount:   float32(amount),
 		Category: "",
 		Source:   "capitalone",
 	}

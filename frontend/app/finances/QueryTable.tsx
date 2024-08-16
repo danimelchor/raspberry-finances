@@ -92,7 +92,7 @@ function inferCell<TData, TValue>(
   if (lowercaseCol.includes("date")) {
     return ({ row }) => {
       let original = row.original as any;
-      return moment.utc(original[col] as string).toISOString();
+      return moment.utc(original[col] as string).format();
     };
   }
 

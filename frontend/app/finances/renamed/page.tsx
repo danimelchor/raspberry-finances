@@ -67,7 +67,7 @@ const columns: ColumnDef<RenamedMerchant>[] = [
     header: ({ column }) => {
       return <DataTableColumnHeader column={column} title="Updated At" />;
     },
-    cell: ({ row }) => moment.utc(row.original.updated_at).toISOString(),
+    cell: ({ row }) => moment.utc(row.original.updated_at).format(),
   },
   {
     id: "actions",
