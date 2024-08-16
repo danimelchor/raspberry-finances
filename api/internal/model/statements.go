@@ -21,6 +21,20 @@ func (s *StatementRow) ToString() string {
 func InsertStatements(username string, statements []StatementRow) error {
 	db := OpenDB()
 
+	// Rename merchants
+	renames, err := GetRenamedMerchants(username)
+	if err != nil {
+		return err
+	}
+
+	for _, rename := range renames {
+		for i, statement := range statements {
+			if statement.Merchant == rename.OriginalMerchant {
+				statements[i].Merchant = rename.NewMerchant
+			}
+		}
+	}
+
 	// Insert statement
 	statement_stmt, err := db.Prepare(`
 		INSERT INTO statements (username, date, merchant, amount, source)

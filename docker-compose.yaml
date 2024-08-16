@@ -1,12 +1,14 @@
 services:
   db:
-    image: postgres:16-alpine
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    image: dmelchor/finances-db:latest
     container_name: db
     env_file:
-      - .env
+      - stack.env
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - app-network
     restart: unless-stopped
@@ -18,7 +20,7 @@ services:
     image: dmelchor/finances-api:latest
     container_name: api
     env_file:
-      - .env
+      - stack.env
     depends_on:
       - db
     networks:

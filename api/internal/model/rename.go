@@ -9,7 +9,7 @@ func RenameMerchant(username string, original_merchant string, new_merchant stri
 	stmt, err := db.Prepare(`
 		INSERT INTO renames (original_merchant, new_merchant, username)
 		VALUES ($1, $2, $3)
-		ON CONFLICT DO UPDATE
+		ON CONFLICT (original_merchant, username) DO UPDATE
 		SET new_merchant = $2
 	`)
 	if err != nil {
