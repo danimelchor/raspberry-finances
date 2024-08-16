@@ -16,6 +16,7 @@ import EditQueryDialog from "./EditQueryDialog";
 import TogglePinnedButton from "./TogglePinnedButton";
 import moment from "moment";
 import humanizeDuration from "humanize-duration";
+import Spinner from "@/components/Spinner";
 
 function CollapsibleSql({ sql }: { sql: string }) {
   const [open, setOpen] = useState(false);
@@ -110,7 +111,11 @@ function QueryTable({ setQuery }: { setQuery: (query: Query) => void }) {
   }, [value]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="pt-6 flex flex-col gap-5">
+        <Spinner />
+      </div>
+    );
   }
 
   return (
@@ -123,7 +128,7 @@ function QueryTable({ setQuery }: { setQuery: (query: Query) => void }) {
       />
       <div className="overflow-y-auto divide-y divide-gray-200 p-1 h-[60vh]">
         {history?.map((h) => (
-          <QueryItem setQuery={setQuery} item={h} key={h.sql} />
+          <QueryItem setQuery={setQuery} item={h} key={h.id} />
         ))}
       </div>
     </div>

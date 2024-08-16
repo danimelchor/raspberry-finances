@@ -48,7 +48,7 @@ type CapitalOneStatementRow struct {
 
 func (am CapitalOneStatementRow) ToStatementRow() db.StatementRow {
 	var amount float64
-	if am.TransactionType == "DEBIT" {
+	if am.TransactionType == "Debit" {
 		amount = math.Abs(am.Amount) * -1
 	} else {
 		amount = math.Abs(am.Amount)

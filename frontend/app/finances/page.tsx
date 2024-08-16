@@ -10,19 +10,13 @@ import QueryEditor from "./QueryEditor";
 import { format } from "sql-formatter";
 import QueryResults from "./QueryResults";
 import RightPannel from "./RightPannel";
-import { useHotkeys } from "react-hotkeys-hook";
 import type { Query } from "@/types";
-import { useStorage } from "@/hooks/useStorage";
 import Header from "./Header";
+import { useHotkeys } from "react-hotkeys-hook";
 
 type QueryResultPre = {
   columns: string[];
   rows: any[][];
-};
-
-const DEFAULT_QUERY: Query = {
-  sql: "SELECT * FROM all_data LIMIT 10",
-  display_type: "table",
 };
 
 const EMPTY_QUERY: Query = {
@@ -37,10 +31,7 @@ function DynamicPage<T>() {
   const [data, setData] = useState<T[]>([]);
   const [columns, setColumns] = useState<string[]>();
 
-  const [currentQuery, setCurrentQuery] = useStorage<Query>(
-    "query-editor",
-    DEFAULT_QUERY,
-  );
+  const [currentQuery, setCurrentQuery] = useState<Query>(EMPTY_QUERY);
 
   useEffect(() => {
     setError(undefined);
@@ -48,7 +39,7 @@ function DynamicPage<T>() {
     setColumns(undefined);
   }, []);
 
-  const handleSubmit = async (query: Query) => {
+  const submit = async (query: Query) => {
     if (query.id && query.sql !== query.originalSql) {
       let confirm = window.confirm(
         "You are about to update a saved query. Are you sure you want to do this?",
@@ -94,7 +85,7 @@ function DynamicPage<T>() {
     isPending: running,
     isSuccess,
   } = useMutation({
-    mutationFn: (q: Query) => handleSubmit(q),
+    mutationFn: submit,
     onSuccess: (data) => {
       if (!data) {
         return;
@@ -114,15 +105,20 @@ function DynamicPage<T>() {
       );
       setError(undefined);
       queryClient.invalidateQueries({ queryKey: ["history-list"] });
+      queryClient.invalidateQueries({ queryKey: ["history"] });
     },
     onError: (error) => {
       setError(error.message);
     },
   });
 
+  useHotkeys("mod+enter", () => handleSubmitMut(currentQuery), [currentQuery]);
   useHotkeys("mod+;", handleFormat);
-  useHotkeys("mod+enter", () => handleSubmitMut(currentQuery));
   useHotkeys("mod+backspace", () => setCurrentQuery(EMPTY_QUERY));
+
+  window.addEventListener("keydown", (e) => {
+    if (e.metaKey) console.log("keydown", e.key);
+  });
 
   return (
     <div className="flex flex-col h-screen w-full p-10 border-box gap-6">
