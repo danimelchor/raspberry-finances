@@ -2,11 +2,6 @@
 
 set -Eeuo pipefail
 
-# Turn off
-USERNAME=dmelchor
-HOST=dmelchorpi.local
-ssh $USERNAME@$HOST "cd ~/finances && docker compose down"
-
 if [[ "$*" == *--build* ]]; then
     docker compose build 
     docker push dmelchor/finances-api:latest
@@ -14,7 +9,10 @@ if [[ "$*" == *--build* ]]; then
     docker push dmelchor/finances-db:latest
 fi
 
+
 # ---- Deploy ----
+USERNAME=dmelchor
+HOST=dmelchorpi.local
 
 # Make directory
 ssh $USERNAME@$HOST "mkdir -p ~/finances"
@@ -23,6 +21,8 @@ ssh $USERNAME@$HOST "mkdir -p ~/finances"
 scp docker-compose.yaml $USERNAME@$HOST:~/finances
 scp -r db $USERNAME@$HOST:~/finances
 
+# Turn off
+ssh $USERNAME@$HOST "cd ~/finances && docker compose down"
 
 if [[ "$*" == *--erase* ]]; then
     # Remove docker volume

@@ -116,10 +116,6 @@ function DynamicPage<T>() {
   useHotkeys("mod+;", handleFormat);
   useHotkeys("mod+backspace", () => setCurrentQuery(EMPTY_QUERY));
 
-  window.addEventListener("keydown", (e) => {
-    if (e.metaKey) console.log("keydown", e.key);
-  });
-
   return (
     <div className="flex flex-col h-screen w-full p-10 border-box gap-6">
       <h1 className="text-4xl font-bold">Dynamic Queries</h1>
