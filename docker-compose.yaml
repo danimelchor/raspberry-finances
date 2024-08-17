@@ -32,9 +32,11 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-      - API_URL=http://api:8000
+        - API_URL=http://api:8000
     image: dmelchor/finances-frontend:latest
     container_name: frontend
+    depends_on:
+    - api
     ports:
       - "3000:3000"
     networks:

@@ -1,4 +1,9 @@
 /** @type {import('next').NextConfig} */
+
+if (process.env.API_URL == null) {
+  throw new Error("API_URL environment variable is required");
+}
+
 const nextConfig = {
   rewrites: async () => {
     return [
