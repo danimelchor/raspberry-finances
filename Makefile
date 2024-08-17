@@ -1,3 +1,6 @@
+USERNAME=dmelchor
+HOST=dmelchorpi.local
+
 .PHONY: dev prod deploy erase-db push
 
 dev:
@@ -13,8 +16,11 @@ dev:
 prod:
 	docker compose -f docker-compose.yaml up --build
 
-USERNAME=dmelchor
-HOST=dmelchorpi.local
+push:
+	@docker compose build
+	@docker push dmelchor/finances-api:latest
+	@docker push dmelchor/finances-frontend:latest
+	@docker push dmelchor/finances-db:latest
 
 deploy:
 	@ssh $(USERNAME)@$(HOST) "mkdir -p ~/finances"
@@ -31,9 +37,3 @@ erase-db:
 	echo; \
 	read -p "Email: " EMAIL; \
 	ssh $(USERNAME)@$(HOST) "docker exec api /cli create-user --username $$USER --password $$PASSWORD --email $$EMAIL"
-
-push:
-	@docker compose build
-	@docker push dmelchor/finances-api:latest
-	@docker push dmelchor/finances-frontend:latest
-	@docker push dmelchor/finances-db:latest
