@@ -25,6 +25,7 @@ services:
       - db
     networks:
       - finances
+      - traefik
     restart: unless-stopped
 
   frontend:
@@ -33,10 +34,11 @@ services:
       dockerfile: Dockerfile
       args:
         - API_URL=http://api:8000
+        - AUTH_URL=http://auth-api:8000
     image: dmelchor/finances-frontend:latest
     container_name: frontend
-    ports:
-      - "3000:3000"
+    env_file:
+      - stack.env
     depends_on:
     - api
     networks:
@@ -45,9 +47,10 @@ services:
     restart: unless-stopped
     labels:
       - traefik.enable=true
-      - traefik.http.routers.frontend.rule=Host(`finance.dmelchor.pi`)
-      - traefik.http.routers.frontend.entrypoints=web
+      - traefik.http.routers.finance.rule=Host(`finance.dmelchor.pi`)
+      - traefik.http.routers.finance.entrypoints=web
       - traefik.port=3000
+      - "traefik.http.routers.finance.middlewares=auth@file"
 
 volumes:
   postgres_data:

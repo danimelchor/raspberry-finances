@@ -1,6 +1,7 @@
 services:
   dev-db:
     image: postgres:16-alpine
+    container_name: dev-db
     env_file:
       - stack.dev.env
     volumes:
@@ -11,6 +12,7 @@ services:
 
   dev-api:
     image: golang:1.22.6-alpine
+    container_name: dev-api
     env_file:
       - stack.dev.env
     volumes:
@@ -24,8 +26,11 @@ services:
 
   dev-frontend:
     image: node:22-alpine
+    container_name: dev-frontend
     command: npm run dev
     working_dir: /app
+    env_file:
+      - stack.dev.env
     volumes:
       - ./frontend:/app
     depends_on:

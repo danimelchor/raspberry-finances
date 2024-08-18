@@ -7,14 +7,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Users
-DROP TABLE IF EXISTS users CASCADE;
-CREATE TABLE IF NOT EXISTS users (
-    username TEXT PRIMARY KEY,
-    email TEXT,
-    password TEXT
-);
-
 -- Statements
 DROP TABLE IF EXISTS statements CASCADE;
 CREATE TABLE statements (
@@ -23,7 +15,7 @@ CREATE TABLE statements (
     merchant TEXT,
     amount REAL,
     source TEXT,
-    username TEXT REFERENCES users(username) ON DELETE CASCADE,
+    username TEXT,
     CONSTRAINT statement_unique UNIQUE (date, merchant, amount, source, username)
 );
 
@@ -33,7 +25,7 @@ CREATE TABLE IF NOT EXISTS categories (
     id SERIAL PRIMARY KEY,
     merchant TEXT,
     category TEXT,
-    username TEXT REFERENCES users(username) ON DELETE CASCADE,
+    username TEXT,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT category_unique UNIQUE (merchant, username)
 );
@@ -48,7 +40,7 @@ DROP TABLE IF EXISTS hidden CASCADE;
 CREATE TABLE IF NOT EXISTS hidden (
     id SERIAL PRIMARY KEY,
     merchant TEXT,
-    username TEXT REFERENCES users(username) ON DELETE CASCADE,
+    username TEXT,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT hidden_unique UNIQUE (merchant, username)
 );
@@ -63,7 +55,7 @@ CREATE TABLE IF NOT EXISTS renames (
     id SERIAL PRIMARY KEY,
     original_merchant TEXT,
     new_merchant TEXT,
-    username TEXT REFERENCES users(username) ON DELETE CASCADE,
+    username TEXT,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT rename_unique UNIQUE (original_merchant, username)
 );
@@ -78,7 +70,7 @@ CREATE TABLE IF NOT EXISTS category_renames (
     id SERIAL PRIMARY KEY,
     original_category TEXT,
     new_category TEXT,
-    username TEXT REFERENCES users(username) ON DELETE CASCADE,
+    username TEXT,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT category_rename_unique UNIQUE (original_category, username)
 );
@@ -92,7 +84,7 @@ DROP TABLE IF EXISTS query_history CASCADE;
 CREATE TABLE IF NOT EXISTS query_history (
     id SERIAL PRIMARY KEY,
     query TEXT,
-    username TEXT REFERENCES users(username) ON DELETE CASCADE,
+    username TEXT,
     pinned BOOLEAN DEFAULT FALSE,
     title TEXT DEFAULT '',
     display_type TEXT DEFAULT 'table',

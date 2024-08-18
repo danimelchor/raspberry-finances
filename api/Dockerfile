@@ -8,7 +8,7 @@ RUN go mod download
 
 COPY . ./
 
-RUN go build -o /api cmd/service/main.go && go build -o /cli cmd/cli/cli.go
+RUN go build -o /api cmd/service/main.go
 
 EXPOSE 8000
 

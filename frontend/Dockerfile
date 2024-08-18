@@ -10,6 +10,9 @@ RUN npm prune --production
 ARG API_URL
 ENV API_URL=$API_URL
 
+ARG AUTH_URL
+ENV AUTH_URL=$AUTH_URL
+
 COPY . .
 
 RUN npm run build
@@ -21,9 +24,6 @@ COPY --from=build /app/package.json ./package.json
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/.next ./.next
 COPY --from=build /app/public ./public
-
-ARG API_URL
-ENV API_URL=$API_URL
 
 EXPOSE 3000
 CMD [ "npm", "start" ]

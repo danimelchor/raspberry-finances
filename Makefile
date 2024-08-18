@@ -4,14 +4,7 @@ HOST=dmelchorpi.local
 .PHONY: dev prod deploy erase-db push
 
 dev:
-	docker compose -f docker-compose.dev.yaml up -d
-	docker compose exec dev-api go run \
-		cmd/cli/cli.go \
-		create-user \
-		--username admin \
-		--password admin \
-		--email admin@finances.com
-	docker compose logs -f
+	docker compose -f docker-compose.dev.yaml up
 
 prod:
 	docker compose -f docker-compose.yaml up --build

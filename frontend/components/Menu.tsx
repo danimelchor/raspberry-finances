@@ -100,10 +100,16 @@ const AVATAR_BG_COLOR = [
 ];
 
 const User = () => {
-  const { data } = useQuery({
+  const { data, isError } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
-      const res = await fetch("/api/auth/whoami");
+      const res = await fetch("/auth/whoami", {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       if (!res.ok) {
         throw new Error("Failed to fetch user");
       }
@@ -121,14 +127,22 @@ const User = () => {
     <DropdownMenu>
       <DropdownMenuTrigger className="bg-transparent hover:bg-slate-100 border-none h-auto px-1 py-3 gap-1 items-center flex w-full">
         <div className="flex items-center">
-          <Avatar>
-            <AvatarFallback className={cn("capitalize font-bold", bgColor)}>
-              {data?.username[0]}
-            </AvatarFallback>
-          </Avatar>
+          {isError ? (
+            <Avatar>
+              <AvatarFallback className="capitalize font-bold bg-red-200">
+                ?
+              </AvatarFallback>
+            </Avatar>
+          ) : (
+            <Avatar>
+              <AvatarFallback className={cn("capitalize font-bold", bgColor)}>
+                {data?.username[0]}
+              </AvatarFallback>
+            </Avatar>
+          )}
           <div className="flex flex-col justify-start items-start">
             <span className="ml-2 text-sm text-slate-600 font-semibold">
-              @{data?.username}
+              @{isError ? "Error fetching" : data?.username}
             </span>
             <span className="ml-2 text-xs text-slate-400 font-normal">
               {data?.email}

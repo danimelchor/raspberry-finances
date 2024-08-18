@@ -7,10 +7,7 @@ async function isAuthenticated(req: NextRequest) {
     return false;
   }
   try {
-    const res = await fetchWithCookies(
-      process.env.API_URL + "/auth/whoami",
-      {},
-    );
+    const res = await fetchWithCookies(process.env.AUTH_URL + "/whoami", {});
     if (res.status !== 200) {
       return false;
     }

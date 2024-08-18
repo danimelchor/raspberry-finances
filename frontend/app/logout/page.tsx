@@ -9,7 +9,7 @@ function LogoutPageInner() {
   const searchParams = useSearchParams();
 
   const handleLogout = useCallback(() => {
-    fetch("/api/auth/logout", {
+    fetch("auth/logout", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

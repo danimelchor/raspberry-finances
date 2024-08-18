@@ -2,10 +2,10 @@ package rest
 
 import (
 	"dmelchorpi/internal/rest/finances"
+	"dmelchorpi/internal/security"
 	"fmt"
-	"net/http"
-
 	"github.com/go-chi/chi/v5"
+	"net/http"
 )
 
 func Health(w http.ResponseWriter, r *http.Request) {
@@ -15,9 +15,8 @@ func Health(w http.ResponseWriter, r *http.Request) {
 
 func ConfigureRouter(r chi.Router) {
 	r.Get("/health", Health)
-	r.Route("/auth", ConfigureAuthRoutes)
 	r.Route("/", func(r chi.Router) {
-		r.Use(AuthMiddleware)
+		r.Use(security.AuthMiddleware)
 		finances.ConfigureRoutes(r)
 	})
 }
