@@ -10,7 +10,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - app-network
+      - finances
     restart: unless-stopped
 
   api:
@@ -24,7 +24,7 @@ services:
     depends_on:
       - db
     networks:
-      - app-network
+      - finances
     restart: unless-stopped
 
   frontend:
@@ -35,16 +35,24 @@ services:
         - API_URL=http://api:8000
     image: dmelchor/finances-frontend:latest
     container_name: frontend
-    depends_on:
-    - api
     ports:
       - "3000:3000"
+    depends_on:
+    - api
     networks:
-      - app-network
+      - finances
+      - traefik
     restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.frontend.rule=Host(`finance.dmelchor.pi`)
+      - traefik.http.routers.frontend.entrypoints=web
+      - traefik.port=3000
 
 volumes:
   postgres_data:
 
 networks:
-  app-network:
+  finances:
+  traefik:
+    external: true

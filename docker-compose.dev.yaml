@@ -7,7 +7,7 @@ services:
       - dev_postgres_data:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      - app-network
+      - finances-network
 
   dev-api:
     image: golang:1.22.6-alpine
@@ -18,7 +18,7 @@ services:
     depends_on:
       - dev-db
     networks:
-      - app-network
+      - finances-network
     command: go run cmd/service/main.go
     working_dir: /app
 
@@ -33,7 +33,7 @@ services:
     ports:
       - "3000:3000"
     networks:
-      - app-network
+      - finances-network
     environment:
       - API_URL=http://dev-api:8000
 
@@ -41,4 +41,4 @@ volumes:
   dev_postgres_data:
 
 networks:
-  app-network:
+  finances-network:
